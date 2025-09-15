@@ -35,6 +35,58 @@ app.get('/api/test-db', (req, res) => {
   });
 });
 
+// Endpoint para registrar un nuevo usuario (AJUSTADO A TU BD)
+app.post('/api/register', (req, res) => {
+  
+  const { 
+    username, 
+    nombreU, 
+    apellido_paterno, 
+    apellido_materno,
+    fecha_nacimiento,
+    email,
+    telefono,
+    genero,
+    password_hash 
+  } = req.body;
+
+  
+  if (!username || !nombreU || !apellido_paterno || !fecha_nacimiento || !email || !genero || !password_hash) {
+    return res.status(400).json({ error: 'Faltan campos obligatorios.' });
+  }
+  
+  // IMPORTANTE: En un proyecto real, aquí deberías "hashear" la contraseña.
+  // Por ahora, asumimos que Angular la enviará ya procesada o la guardamos en texto plano.
+
+  const sqlQuery = `
+    INSERT INTO usuarios 
+    (username, nombreU, apellido_paterno, apellido_materno, fecha_nacimiento, email, telefono, genero, password_hash) 
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `;
+
+  
+  connection.query(
+    sqlQuery, 
+    [username, nombreU, apellido_paterno, apellido_materno, fecha_nacimiento, email, telefono, genero, password_hash], 
+    (err, results) => {
+      if (err) {
+        console.error('Error al registrar el usuario:', err);
+    
+        if (err.code === 'ER_DUP_ENTRY') {
+            return res.status(409).json({ error: 'El email o el nombre de usuario ya existen.' });
+        }
+        return res.status(500).json({ error: 'Error interno del servidor al registrar el usuario.' });
+      }
+
+     
+      console.log('Usuario registrado con éxito con ID:', results.insertId);
+      res.status(201).json({ 
+        message: '¡Usuario registrado con éxito!',
+        userId: results.insertId 
+      });
+    }
+  );
+});
 
 const PORT = 3000;
 app.listen(PORT, () => {
