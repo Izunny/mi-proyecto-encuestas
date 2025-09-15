@@ -4,8 +4,8 @@ import { Component } from '@angular/core';
   selector: 'app-encuesta-resultados',
   standalone: true,
   imports: [],
-  templateUrl: './encuesta-resultados.html',
-  styleUrls: ['./encuesta-resultados.scss']
+  templateUrl: './encuesta-resultados.component.html',
+  styleUrls: ['./encuesta-resultados.component.scss']
 })
 export class EncuestaResultadosComponent {
 
