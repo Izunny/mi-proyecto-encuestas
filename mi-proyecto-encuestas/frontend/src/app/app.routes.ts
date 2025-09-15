@@ -25,3 +25,4 @@ export const routes: Routes = [
     // Redirige cualquier ruta no encontrada a la página principal
     { path: '**', redirectTo: '', pathMatch: 'full' } 
 ];
+
