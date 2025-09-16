@@ -1,24 +1,18 @@
+/* src/app/landing/landing.component.scss */
 
 :host {
-  --bg-color: #0d1117;
-  --text-color: #c9d1d9;
-  --primary-color: #8a2be2;
-  --primary-color-hover: #7324bf; 
-  --highlight-color: #58a6ff;
-  --border-color: #30363d;
-  --card-bg: #161b22;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+
+  display: block;
+  width: 100%;
 }
 
-/* --- Contenedor Principal --- */
 .landing-container {
-  background-color: var(--bg-color);
-  color: var(--text-color);
-  min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
+  min-height: 100vh;
   padding: 0 5%;
+  box-sizing: border-box; 
 }
 
 /* --- Cabecera y Navegación --- */
@@ -32,7 +26,7 @@
   
   .logo {
     font-weight: bold;
-    font-size: 1.2rem;
+    font-size: 1.5rem;
   }
   
   .main-nav a {
@@ -47,49 +41,22 @@
   }
 }
 
-/* --- Botones --- */
-.btn {
-  padding: 10px 20px;
-  border-radius: 6px;
-  text-decoration: none;
-  font-weight: 600;
-  transition: all 0.3s ease;
-}
-
-.btn-primary {
-  background-color: var(--primary-color);
-  color: #fff;
-  border: 1px solid var(--primary-color);
-
-  &:hover {
-   
-    background-color: var(--primary-color-hover); 
-  }
-}
-
-.btn-secondary {
-  background-color: transparent;
-  color: var(--text-color);
-  border: 1px solid var(--border-color);
-  
-  &:hover {
-    background-color: var(--border-color);
-    color: #fff;
-  }
-}
-
 /* --- Sección Hero --- */
 .hero-section {
   text-align: center;
   padding: 80px 0;
-  
+  flex-grow: 1; 
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   
   h1 {
     font-size: 3.5rem;
     margin-bottom: 1rem;
     .highlight-blue {
-      text-decoration: underline;
-      text-decoration-color: var(--highlight-color);
+      
+      border-bottom: 3px solid var(--highlight-color);
+      padding-bottom: 4px;
     }
   }
   
@@ -115,16 +82,6 @@
   }
 }
 
-/* ---  Características --- */
-.features-section {
-  padding: 60px 0;
-  text-align: center;
-  
-  h2 {
-    font-size: 2.5rem;
-  }
-}
-
 /* --- Pie de Página --- */
 .main-footer {
   width: 100%;
@@ -133,7 +90,6 @@
   align-items: center;
   padding: 20px 0;
   border-top: 1px solid var(--border-color);
-  margin-top: auto; 
   
   .copyright {
     font-size: 0.9rem;
@@ -141,8 +97,13 @@
   }
   
   .social-media a {
-    color: var(--text-color);
+    color: #8b949e; 
     margin-left: 15px;
     font-size: 1.2rem;
+    transition: color 0.3s ease;
+
+    &:hover {
+      color: var(--text-color); 
+    }
   }
 }
