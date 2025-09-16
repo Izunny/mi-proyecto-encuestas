@@ -1,7 +1,8 @@
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { HeaderComponent } from './components/header/header.component'; // 1. IMPORTA EL HEADERCOMPONENT
+import { HeaderComponent } from './components/header/header.component';
 import { ModalAlertComponent } from './components/modal-alert/modal-alert.component';
+import { FooterComponent } from './components/footer/footer.component';
 
 @Component({
   selector: 'app-root',
@@ -9,7 +10,7 @@ import { ModalAlertComponent } from './components/modal-alert/modal-alert.compon
   imports: [
     RouterOutlet,
     HeaderComponent,
-    
+    FooterComponent,
   ],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
