@@ -3,23 +3,66 @@ const mysql = require('mysql2');
 const cors = require('cors');
 
 const app = express();
-
-
 app.use(cors());
 app.use(express.json());
+/*
+const db = mysql.createConnection({
+  host: 'localhost',
+  user: 'root',
+  password: 'password',
+  database: 'db_encuestas'
+});
 
+// CREATE
+app.post('/usuarios', (req, res) => {
+  const { nombre, email } = req.body;
+  db.query('INSERT INTO usuarios (nombre, email) VALUES (?, ?)', [nombre, email], (err, result) => {
+    if (err) return res.json(err);
+    res.json(result);
+  });
+});
+
+// READ
+app.get('/usuarios', (req, res) => {
+  db.query('SELECT * FROM usuarios', (err, result) => {
+    if (err) return res.json(err);
+    res.json(result);
+  });
+});
+
+// UPDATE
+app.put('/usuarios/:id', (req, res) => {
+  const { id } = req.params;
+  const { nombre, email } = req.body;
+  db.query('UPDATE usuarios SET nombre = ?, email = ? WHERE id = ?', [nombre, email, id], (err, result) => {
+    if (err) return res.json(err);
+    res.json(result);
+  });
+});
+
+// DELETE
+app.delete('/usuarios/:id', (req, res) => {
+  const { id } = req.params;
+  db.query('DELETE FROM usuarios WHERE id = ?', [id], (err, result) => {
+    if (err) return res.json(err);
+    res.json(result);
+  });
+});
+
+app.listen(3000, () => {
+  console.log('Servidor corriendo en puerto 3000');
+});
+*/
 
 const connection = mysql.createConnection({
   host: 'localhost',
   user: 'root',
-  password: '', 
+  password: 'password', 
   database: 'db_encuestas' 
 });
 
-
-
 // Endpoint de prueba para verificar la conexión a la base de datos
-app.get('/api/test-db', (req, res) => {
+app.get('/usuarios', (req, res) => {
   connection.query('SELECT 1', (err, results) => {
     if (err) {
       console.error('Error al conectar con la BD:', err);
@@ -28,7 +71,9 @@ app.get('/api/test-db', (req, res) => {
         error: 'No se pudo conectar a la base de datos.' 
       });
     }
-    res.json({ 
+
+    res.json(
+      { 
       ok: true, 
       message: '¡Conexión a la base de datos "db_encuestas" exitosa! ✅' 
     });

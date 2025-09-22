@@ -1,9 +1,9 @@
 import { Routes } from '@angular/router';
 
 // Importa todos los componentes de tus páginas
-import { LandingComponent } from './pages/landing/landing.component';
-import { RegisterComponent } from './pages/register/register.component';
-import { LoginComponent } from './pages/login/login.component'; 
+import { LandingComponent } from './pages/home/landing/landing.component';
+import { RegisterComponent } from './pages/home/register/register.component';
+import { LoginComponent } from './pages/home/login/login.component'; 
 import { DashboardComponent } from './pages/dashboard/dashboard.component';
 import { EncuestaAgregarComponent } from './pages/encuesta-agregar/encuesta-agregar.component';
 import { EncuestaEditarComponent } from './pages/encuesta-editar/encuesta-editar.component';
