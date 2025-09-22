@@ -3,6 +3,10 @@
 
   <main class="main-content">
     <header class="content-header">
+    <button class="btn btn-back1" (click)="goBack()">
+      <i class="fas fa-arrow-left"></i>
+    </button>
+
       <h1 class="app-title">Encuestas Dinamicas</h1>
       <div class="header-actions">
         <button class="btn btn-secondary"><i class="fas fa-download"></i> Descargar</button>
@@ -85,7 +89,7 @@
         <button type="button" (click)="agregarPregunta()" class="btn btn-primary add-question-btn">
           Agregar una pregunta
         </button>
-        <button type="submit" class="btn btn-secondary" >
+        <button type="submit" class="btn btn-secondary" hidden>
           Guardar Encuesta
         </button>
       </div>

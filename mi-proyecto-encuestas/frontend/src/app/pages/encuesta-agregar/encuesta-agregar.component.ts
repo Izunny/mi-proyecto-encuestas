@@ -81,4 +81,9 @@ export class EncuestaAgregarComponent implements OnInit {
       console.log('El formulario no es válido');
     }
   }
+
+  goBack() {
+  window.history.back();
+}
+
 }

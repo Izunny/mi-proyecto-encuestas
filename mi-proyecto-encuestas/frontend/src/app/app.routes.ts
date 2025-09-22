@@ -11,6 +11,7 @@ import { EncuestaResponderComponent } from './pages/encuesta-responder/encuesta-
 import { EncuestaResultadosComponent } from './pages/encuesta-resultados/encuesta-resultados.component';
 import { TokenExpiradoComponent } from './pages/token-expirado/token-expirado.component';
 
+
 export const routes: Routes = [
     { path: '', component: LandingComponent }, // La página principal
     { path: 'registro', component: RegisterComponent },
@@ -21,6 +22,7 @@ export const routes: Routes = [
     { path: 'encuesta/responder/:id', component: EncuestaResponderComponent },
     { path: 'encuesta/resultados/:id', component: EncuestaResultadosComponent },
     { path: 'token-expirado', component: TokenExpiradoComponent },
+    
 
     // Redirige cualquier ruta no encontrada a la página principal
     { path: '**', redirectTo: '', pathMatch: 'full' } 

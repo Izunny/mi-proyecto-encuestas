@@ -1,1 +1,48 @@
-<p>dashboard works!</p>
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h3>Hola, <b>Usuario</b>.</h3>
+    <input type="text" class="form-control w-25" placeholder="Buscar encuesta..." [(ngModel)]="searchTerm">
+  </div>
+
+  <nav class="nav-menu mb-3">
+    <a class="btn btn-light" [class.disabled]="!selectedSurveyId" [routerLink]="['/resultados', selectedSurveyId]">Ver Resultados</a>
+    <a class="btn btn-light" [class.disabled]="!selectedSurveyId">Compartir Encuesta</a>
+    <a class="btn btn-light" [class.disabled]="!selectedSurveyId" [routerLink]="['/encuesta/editar', selectedSurveyId]">Editar Encuesta</a>
+    <a class="btn btn-danger" [class.disabled]="!selectedSurveyId" (click)="deleteSelectedSurvey()">Eliminar Encuesta</a>
+  </nav>
+
+  <table class="table table-hover">
+    <thead>
+      <tr>
+        <th></th>
+        <th>Título</th>
+        <th>Descripción</th>
+        <th>Autor</th>
+        <th>Fecha</th>
+        <th>Estado</th>
+        <th>Descargar</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let survey of filteredSurveys">
+        <td>
+          <input type="radio" name="seleccionEncuesta" [value]="survey.idencuesta" (click)="selectSurvey(survey.idencuesta)">
+        </td>
+        <td>{{ survey.nombre }}</td>
+        <td>{{ survey.descripcion }}</td>
+        <td>{{ survey.nombreU }}</td>
+        <td>{{ survey.fecha | date: 'dd/MM/yyyy' }}</td>
+        <td>
+          <button class="btn btn-sm" 
+                  [ngClass]="survey.activo === 'S' ? 'btn-success' : 'btn-danger'"
+                  (click)="changeStatus(survey)">
+            {{ survey.activo === 'S' ? 'Activo' : 'Inactivo' }}
+          </button>
+        </td>
+        <td>
+          <a href="#" class="btn btn-primary">Descargar</a>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
