@@ -80,7 +80,7 @@
 
 .center-section{
   display: flex;
-  padding: 20px;
+  padding: 20px 50px 20px 50px;
   justify-content:space-between;
 }
 
@@ -92,34 +92,100 @@
 }
 
 img {
-    width: 500px;
+    width: 700px;
     border-radius: 10px;
-    border: 1px solid var(--border-color);
+    border: 4px solid var(--border-color);
 }
 
+
 form {
-  border-radius: 5px;
   padding: 20px;
 }
 
 label {display: block;}
 
-input {
+input{
   background-color: transparent;
+  
   color: white;
   width: 100%;
-  padding: 10px;
-  margin: 8px 0;
+  padding: 10px 10px 10px 35px;
+  margin: 10px 0px 15px 0px;
   display: inline-block;
   border: solid #ffffff;
   border-width: 0px 0px 2px 0px;
   box-sizing: border-box;
+
+  background-repeat: no-repeat;
+  background-size: 5% 50%;
+  background-position: 2px;
+
+}
+
+#name{
+  background-image: url('/assets/images/search.png');
+}
+
+#email{
+  background-image: url('/assets/images/mensaje.png');
+}
+
+#password{
+  background-image: url('/assets/images/contraseña.png');
 }
 
 
 input:focus {
   outline: none;
 }
+
+/* From Uiverse.io by cssbuttons-io */ 
+button {
+  align-items: center;
+  background-image: linear-gradient(144deg, #C10C99, #5b42f3 50%, #5b42f3);
+  border: 0;
+  border-radius: 8px;
+  box-shadow: rgba(151, 65, 252, 0.2) 0 15px 30px -5px;
+  box-sizing: border-box;
+  color: #ffffff;
+  display: flex;
+  font-size: 20px;
+  justify-content: center;
+  line-height: 1.5em;
+  max-width: 100%;
+  min-width: 140px;
+  padding: 3px;
+  text-decoration: none;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+button:active,
+button:hover {
+  outline: 0;
+}
+
+button span {
+  background-color: rgb(5, 6, 45);
+  padding: 16px 24px;
+  border-radius: 6px;
+  width: 100%;
+  height: 100%;
+  transition: 300ms;
+}
+
+button:hover span {
+  background: none;
+}
+
+button:active {
+  transform: scale(0.9);
+}
+
 
 /* --- Pie de Página --- */
 .main-footer {
