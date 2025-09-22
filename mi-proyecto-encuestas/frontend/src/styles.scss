@@ -51,3 +51,40 @@ body {
     color: #fff;
   }
 }
+
+// Header utilizado en las paginas de inicio
+/* --- Cabecera y Navegación --- */
+.main-header {
+    width: 1000px;
+    height: 100px;
+    background-color: #1A2132;
+    margin: 20px auto;   
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 20px;
+}
+
+.img-logo {
+    width: 50px;
+    padding: 0px 25px 0px 0px;
+}
+
+.logo {
+    font-weight: bold;
+    font-size: 1.5rem;
+}
+
+.main-nav a {
+    color: var(--text-color);
+    text-decoration: none;
+    margin-left: 20px;
+    transition: color 0.3s ease;
+    
+    &:hover {
+    color: var(--highlight-color);
+    }
+}
+
+
+
