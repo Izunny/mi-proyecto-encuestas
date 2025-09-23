@@ -125,3 +125,30 @@ const PORT = 3000;
 app.listen(PORT, () => {
   console.log(`🚀 Servidor backend corriendo en http://localhost:${PORT}`);
 });
+
+app.put('/api/surveys/:surveyId/status', (req, res) => {
+  const { surveyId } = req.params;
+  const { nuevoEstado } = req.body; // 'S' o 'N'
+
+  // Validación simple
+  if (!['S', 'N'].includes(nuevoEstado)) {
+    return res.status(400).json({ error: 'Estado no válido. Debe ser S o N.' });
+  }
+
+  const sqlQuery = `
+    UPDATE enc_encuestasm 
+    SET activo = ? 
+    WHERE idencuesta = ?;
+  `;
+
+  db.query(sqlQuery, [nuevoEstado, surveyId], (err, result) => {
+    if (err) {
+      console.error(`Error al actualizar estado de la encuesta ${surveyId}:`, err);
+      return res.status(500).json({ error: 'Error interno del servidor.' });
+    }
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'No se encontró la encuesta con ese ID.' });
+    }
+    res.json({ message: 'Estado actualizado con éxito.' });
+  });
+});

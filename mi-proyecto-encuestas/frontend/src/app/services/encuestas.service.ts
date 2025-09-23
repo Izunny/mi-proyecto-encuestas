@@ -22,11 +22,13 @@ export class EncuestasService {
 
   // Actualiza el estado de una encuesta
   updateSurveyStatus(surveyId: number, newStatus: string): Observable<any> {
-    return this.http.put(`${this.apiUrl}/surveys/${surveyId}/status`, { nuevoEstado: newStatus });
+    const url = `${this.apiUrl}/surveys/${surveyId}/status`;
+    return this.http.put(url, { nuevoEstado: newStatus });
   }
-
   // --- Aquí puedes agregar los métodos para obtener TODAS las encuestas que mencionamos antes ---
   getAllSurveys(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/surveys`); // Suponiendo que tienes este endpoint
   }
+
+
 }

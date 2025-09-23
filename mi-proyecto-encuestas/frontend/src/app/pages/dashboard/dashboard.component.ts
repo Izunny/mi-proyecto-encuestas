@@ -68,6 +68,24 @@ export class DashboardComponent implements OnInit {
     }
   }
 
+  changeStatus(survey: any): void {
+    // 1. Determina cuál será el nuevo estado
+    const nuevoEstado = survey.activo === 'S' ? 'N' : 'S';
+    const surveyId = survey.idencuesta;
+
+    // 2. Llama al servicio para actualizar en la base de datos
+    this.encuestasService.updateSurveyStatus(surveyId, nuevoEstado).subscribe({
+      next: () => {
+        // 3. Si el backend confirma, actualiza la vista al instante
+        survey.activo = nuevoEstado;
+      },
+      error: (err: any) => {
+        // 4. Si hay un error, muéstralo
+        alert('Error al cambiar el estado: ' + err.message);
+      }
+    });
+  }
+
   // --- Tus métodos existentes ---
   selectSurvey(id: number): void {
     this.selectedSurveyId = id;
@@ -88,11 +106,5 @@ export class DashboardComponent implements OnInit {
     }
   }
 
-  changeStatus(survey: any): void {
-    const nuevoEstado = survey.activo === 'S' ? 'N' : 'S';
-    this.encuestasService.updateSurveyStatus(survey.idencuesta, nuevoEstado).subscribe({
-        next: () => { survey.activo = nuevoEstado; },
-        error: (err: any) => alert('Error al cambiar el estado: ' + err.message)
-    });
-  }
+ 
 }
