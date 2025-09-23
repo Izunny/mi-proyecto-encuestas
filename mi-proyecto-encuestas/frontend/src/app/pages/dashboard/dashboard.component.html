@@ -36,61 +36,60 @@
   
 
 
-    <div class="search-actions">
-      
-      <input type="text" 
-            class="survey-title-input" 
-            placeholder="Buscar encuesta..." 
-            [(ngModel)]="searchTerm">
+      <div class="search-actions">
+        
+        <input type="text" 
+              class="survey-title-input" 
+              placeholder="Buscar encuesta..." 
+              [(ngModel)]="searchTerm"
+              (input)="filterSurveys()"> <div class="actions">
+          <button class="btn btn-info me-2" (click)="toggleView()">
+            {{ viewMode === 'user' ? 'Ver Todas las Encuestas' : 'Ver Mis Encuestas' }}
+          </button>
 
-      
-      <div class="actions">
-        <a class="btn btn-secondary me-2" 
-          [class.disabled]="!selectedSurveyId" 
-          (click)="deleteSelectedSurvey()">Eliminar</a>
+          <a class="btn btn-secondary me-2" 
+            [class.disabled]="!selectedSurveyId" 
+            (click)="deleteSelectedSurvey()">Eliminar</a>
 
-        <a class="btn btn-secondary" 
-          [routerLink]="['/encuesta/agregar']">Crear</a>
+          <a class="btn btn-secondary" 
+            [routerLink]="['/encuesta/agregar']">Crear</a>
+        </div>
       </div>
-    </div>
 
 
-  <div class="card-body"> 
-      <table class="table table-hover">
-        <thead>
-          <tr>
-            <th></th>
-            <th>Título</th>
-            <th>Descripción</th>
-            <th>Fecha</th>
-            <th>Estado</th>
-            <th>Descargar</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let survey of filteredSurveys">
-            <td>
-              <input type="radio" name="seleccionEncuesta" [value]="survey.idencuesta" (click)="selectSurvey(survey.idencuesta)">
-            </td>
-            <td>{{ survey.nombre }}</td>
-            <td>{{ survey.descripcion }}</td>
-            <td>{{ survey.nombreU }}</td>
-            <td>{{ survey.fecha | date: 'dd/MM/yyyy' }}</td>
-            <td>
-              <button class="btn btn-sm" 
-                      [ngClass]="survey.activo === 'S' ? 'btn-success' : 'btn-danger'"
-                      (click)="changeStatus(survey)">
-                {{ survey.activo === 'S' ? 'Activo' : 'Inactivo' }}
-              </button>
-            </td>
-            <td>
-              <a href="#" class="btn btn-primary">Descargar</a>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-
-    </div>
+<div class="card-body"> 
+  <table class="table table-hover">
+    <thead>
+      <tr>
+        <th></th> <!-- Para el radio button -->
+        <th>Título</th>
+        <th>Descripción</th>
+        <th>Usuario</th>
+        <th>Fecha</th>
+        <th>Estado</th> <!-- Columna de estado -->
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let survey of filteredSurveys">
+        <td>
+          <input type="radio" name="seleccionEncuesta" [value]="survey.idencuesta" (click)="selectSurvey(survey.idencuesta)">
+        </td>
+        <td>{{ survey.nombre }}</td>
+        <td>{{ survey.descripcion }}</td>
+        <td>{{ survey.nombreU }}</td>
+        <td>{{ survey.fecha | date: 'dd/MM/yyyy' }}</td>
+        <td>
+          <!-- ESTE ES EL NUEVO BOTÓN DE ESTADO -->
+          <button class="btn btn-sm" 
+                  [ngClass]="survey.activo === 'S' ? 'btn-success' : 'btn-danger'"
+                  (click)="changeStatus(survey)">
+            {{ survey.activo === 'S' ? 'Activo' : 'Inactivo' }}
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
 
   </div>
   </main>

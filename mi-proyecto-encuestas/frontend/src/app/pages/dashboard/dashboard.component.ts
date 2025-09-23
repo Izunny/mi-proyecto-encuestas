@@ -1,19 +1,13 @@
 import { Component, OnInit } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-// 1. IMPORTA LOS MÓDULOS NECESARIOS
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
+import { EncuestasService } from '../../services/encuestas.service';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  // 2. AÑÁDELOS AL ARREGLO DE IMPORTS
-  imports: [
-    CommonModule,
-    FormsModule,
-    RouterModule
-  ],
+  imports: [ CommonModule, FormsModule, RouterModule ],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss']
 })
@@ -21,63 +15,84 @@ export class DashboardComponent implements OnInit {
   surveys: any[] = [];
   filteredSurveys: any[] = [];
   selectedSurveyId: number | null = null;
-  
-  private _searchTerm: string = '';
-  private apiUrl = 'http://localhost:3000/api';
+  searchTerm: string = '';
 
-  constructor(private http: HttpClient) { }
+  // === PROPIEDADES NUEVAS ===
+  viewMode: 'user' | 'all' = 'user'; // Por defecto, muestra las del usuario
+  currentUserId: number = 1; // Debes obtener el ID del usuario logueado
+
+  constructor(private encuestasService: EncuestasService) { }
 
   ngOnInit(): void {
-    this.loadSurveys();
+    // Al iniciar, carga las encuestas del usuario por defecto
+    this.loadUserSurveys();
   }
 
-  loadSurveys(): void {
-    const userId = 1;
-    this.http.get<any[]>(`${this.apiUrl}/surveys/user/${userId}`).subscribe(data => {
+  // === MÉTODOS NUEVOS Y ACTUALIZADOS ===
+
+  // Carga las encuestas del usuario actual
+  loadUserSurveys(): void {
+    this.encuestasService.getSurveysByUser(this.currentUserId).subscribe((data: any[]) => {
       this.surveys = data;
-      this.filteredSurveys = data;
+      this.filterSurveys(); // Llama al filtro después de cargar
     });
   }
 
+  // Carga TODAS las encuestas
+  loadAllSurveys(): void {
+    // Asegúrate de tener este método en tu servicio (EncuestasService)
+    this.encuestasService.getAllSurveys().subscribe((data: any[]) => {
+      this.surveys = data;
+      this.filterSurveys(); // Llama al filtro después de cargar
+    });
+  }
+
+  // Función para cambiar de vista (la que llamaba el botón)
+  toggleView(): void {
+    this.viewMode = this.viewMode === 'user' ? 'all' : 'user';
+    if (this.viewMode === 'user') {
+      this.loadUserSurveys();
+    } else {
+      this.loadAllSurveys();
+    }
+  }
+
+  // Función de filtrado (la que llamaba el input)
+  filterSurveys(): void {
+    if (!this.searchTerm) {
+      this.filteredSurveys = this.surveys;
+    } else {
+      this.filteredSurveys = this.surveys.filter(survey =>
+        survey.nombre.toLowerCase().includes(this.searchTerm.toLowerCase())
+      );
+    }
+  }
+
+  // --- Tus métodos existentes ---
   selectSurvey(id: number): void {
     this.selectedSurveyId = id;
   }
 
-  get searchTerm(): string {
-    return this._searchTerm;
-  }
-
-  set searchTerm(value: string) {
-    this._searchTerm = value;
-    this.filteredSurveys = this.surveys.filter(survey => 
-      survey.nombre.toLowerCase().includes(value.toLowerCase())
-    );
-  }
-
   deleteSelectedSurvey(): void {
-    if (!this.selectedSurveyId) {
-      alert('Por favor, selecciona una encuesta para eliminar.');
-      return;
-    }
+    if (!this.selectedSurveyId) return;
     if (confirm('¿Estás seguro de que quieres eliminar esta encuesta?')) {
-      this.http.delete(`${this.apiUrl}/surveys/${this.selectedSurveyId}`).subscribe({
+      this.encuestasService.deleteSurvey(this.selectedSurveyId).subscribe({
         next: () => {
           alert('Encuesta eliminada con éxito.');
-          this.loadSurveys();
+          // Recarga la vista actual
+          this.viewMode === 'user' ? this.loadUserSurveys() : this.loadAllSurveys();
           this.selectedSurveyId = null;
         },
-        error: (err) => alert('Error al eliminar la encuesta: ' + err.message)
+        error: (err: any) => alert('Error al eliminar la encuesta: ' + err.message)
       });
     }
   }
 
   changeStatus(survey: any): void {
-      const nuevoEstado = survey.activo === 'S' ? 'N' : 'S';
-      this.http.put(`${this.apiUrl}/surveys/${survey.idencuesta}/status`, { nuevoEstado }).subscribe({
-          next: () => {
-              survey.activo = nuevoEstado;
-          },
-          error: (err) => alert('Error al cambiar el estado: ' + err.message)
-      });
+    const nuevoEstado = survey.activo === 'S' ? 'N' : 'S';
+    this.encuestasService.updateSurveyStatus(survey.idencuesta, nuevoEstado).subscribe({
+        next: () => { survey.activo = nuevoEstado; },
+        error: (err: any) => alert('Error al cambiar el estado: ' + err.message)
+    });
   }
 }

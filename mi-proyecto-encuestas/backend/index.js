@@ -5,13 +5,16 @@ const cors = require('cors');
 const app = express();
 app.use(cors());
 app.use(express.json());
-/*
+
+// 🔹 Conexión única a la BD
 const db = mysql.createConnection({
   host: 'localhost',
   user: 'root',
-  password: 'password',
+  password: '',
   database: 'db_encuestas'
 });
+
+// ... (todas tus rutas de usuarios y register van aquí, no cambian)
 
 // CREATE
 app.post('/usuarios', (req, res) => {
@@ -49,59 +52,13 @@ app.delete('/usuarios/:id', (req, res) => {
   });
 });
 
-app.listen(3000, () => {
-  console.log('Servidor corriendo en puerto 3000');
-});
-*/
-
-const connection = mysql.createConnection({
-  host: 'localhost',
-  user: 'root',
-  password: 'password', 
-  database: 'db_encuestas' 
-});
-
-// Endpoint de prueba para verificar la conexión a la base de datos
-app.get('/usuarios', (req, res) => {
-  connection.query('SELECT 1', (err, results) => {
-    if (err) {
-      console.error('Error al conectar con la BD:', err);
-      return res.status(500).json({ 
-        ok: false, 
-        error: 'No se pudo conectar a la base de datos.' 
-      });
-    }
-
-    res.json(
-      { 
-      ok: true, 
-      message: '¡Conexión a la base de datos "db_encuestas" exitosa! ✅' 
-    });
-  });
-});
-
-// Endpoint para registrar un nuevo usuario (AJUSTADO A TU BD)
+// Registro de usuario (tu endpoint extendido)
 app.post('/api/register', (req, res) => {
-  
-  const { 
-    username, 
-    nombreU, 
-    apellido_paterno, 
-    apellido_materno,
-    fecha_nacimiento,
-    email,
-    telefono,
-    genero,
-    password_hash 
-  } = req.body;
+  const { username, nombreU, apellido_paterno, apellido_materno, fecha_nacimiento, email, telefono, genero, password_hash } = req.body;
 
-  
   if (!username || !nombreU || !apellido_paterno || !fecha_nacimiento || !email || !genero || !password_hash) {
     return res.status(400).json({ error: 'Faltan campos obligatorios.' });
   }
-  
-  // IMPORTANTE: En un proyecto real, aquí deberías "hashear" la contraseña.
-  // Por ahora, asumimos que Angular la enviará ya procesada o la guardamos en texto plano.
 
   const sqlQuery = `
     INSERT INTO usuarios 
@@ -109,33 +66,62 @@ app.post('/api/register', (req, res) => {
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
   `;
 
-  
-  connection.query(
-    sqlQuery, 
-    [username, nombreU, apellido_paterno, apellido_materno, fecha_nacimiento, email, telefono, genero, password_hash], 
-    (err, results) => {
-      if (err) {
-        console.error('Error al registrar el usuario:', err);
-    
-        if (err.code === 'ER_DUP_ENTRY') {
-            return res.status(409).json({ error: 'El email o el nombre de usuario ya existen.' });
-        }
-        return res.status(500).json({ error: 'Error interno del servidor al registrar el usuario.' });
+  db.query(sqlQuery, [username, nombreU, apellido_paterno, apellido_materno, fecha_nacimiento, email, telefono, genero, password_hash], (err, results) => {
+    if (err) {
+      console.error('Error al registrar el usuario:', err);
+      if (err.code === 'ER_DUP_ENTRY') {
+        return res.status(409).json({ error: 'El email o el nombre de usuario ya existen.' });
       }
-
-     
-      console.log('Usuario registrado con éxito con ID:', results.insertId);
-      res.status(201).json({ 
-        message: '¡Usuario registrado con éxito!',
-        userId: results.insertId 
-      });
+      return res.status(500).json({ error: 'Error interno del servidor al registrar el usuario.' });
     }
-  );
+    res.status(201).json({ message: '¡Usuario registrado con éxito!', userId: results.insertId });
+  });
 });
 
+// OBTENER TODAS LAS ENCUESTAS (CON EL NOMBRE DEL USUARIO)
+app.get('/api/surveys', (req, res) => {
+  const sqlQuery = `
+    SELECT 
+      e.*, 
+      u.nombreU 
+    FROM enc_encuestasm e  -- <-- CORREGIDO
+    JOIN usuarios u ON e.idusuario = u.idusuario;
+  `;
+
+  db.query(sqlQuery, (err, results) => {
+    if (err) {
+      console.error('Error al obtener todas las encuestas:', err);
+      return res.status(500).json({ error: 'Error interno del servidor.' });
+    }
+    res.json(results);
+  });
+});
+
+// OBTENER LAS ENCUESTAS DE UN USUARIO ESPECÍFICO
+app.get('/api/surveys/user/:userId', (req, res) => {
+  const { userId } = req.params;
+
+  const sqlQuery = `
+    SELECT 
+      e.*, 
+      u.nombreU 
+    FROM enc_encuestasm e  -- <-- CORREGIDO
+    JOIN usuarios u ON e.idusuario = u.idusuario
+    WHERE e.idusuario = ?;
+  `;
+
+  db.query(sqlQuery, [userId], (err, results) => {
+    if (err) {
+    console.error(`Error al obtener encuestas para el usuario ${userId}:`, err);
+      return res.status(500).json({ error: 'Error interno del servidor.' });
+    }
+    res.json(results);
+  });
+});
+
+
+// 🔹 Servidor corriendo en un solo puerto
 const PORT = 3000;
 app.listen(PORT, () => {
   console.log(`🚀 Servidor backend corriendo en http://localhost:${PORT}`);
 });
-
-//http://localhost:3000/api/test-db
