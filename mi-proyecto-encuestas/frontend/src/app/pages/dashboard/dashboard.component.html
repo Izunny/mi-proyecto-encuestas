@@ -10,7 +10,7 @@
       </div>
     
 
-  <div class="d-flex justify-content-between align-items-center mb-3">
+  <div class="d-flex justify-content-between align-items-center">
     <h3>Hola, <b>Usuario</b>.</h3>
   </div>
   </header>
@@ -33,17 +33,17 @@
 
     </nav>
 
-  </div>
+  
 
 
-    <div class="search-actions mb-3">
-      <!-- Buscar (izquierda) -->
+    <div class="search-actions">
+      
       <input type="text" 
             class="survey-title-input" 
             placeholder="Buscar encuesta..." 
             [(ngModel)]="searchTerm">
 
-      <!-- Botones (derecha) -->
+      
       <div class="actions">
         <a class="btn btn-secondary me-2" 
           [class.disabled]="!selectedSurveyId" 
@@ -91,5 +91,7 @@
       </table>
 
     </div>
+
+  </div>
   </main>
 </div>

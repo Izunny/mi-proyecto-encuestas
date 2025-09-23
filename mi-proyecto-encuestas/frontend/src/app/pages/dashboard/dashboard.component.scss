@@ -15,7 +15,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 8px 20px;
+    padding: 7px 20px;
     border-bottom: 1px solid #fff;
     background-color: #181F2D;
 
@@ -39,7 +39,7 @@
 .btn-danger.btn-crear {
   border: 1px solid var(--border-color);
   color: white;
-  padding: px 16px;
+  padding:  16px;
   border-radius: 6px;
   font-weight: 500;
   cursor: pointer;
@@ -52,13 +52,17 @@
 }
 
 .nav-menu a {
-  color: white !important;       /* siempre blanco */
-  text-decoration: none;         /* quita el subrayado */
+
+  color: white !important;    
+  text-decoration: none;         
+}
+
+.mb-3 {
+    margin: 20px;
 }
 
 .nav-menu a:hover {
-    
-  color: #ddd !important;        /* un gris clarito al pasar el mouse */
+  color: #ddd !important;
 }
 
 .btn-secondary:hover {
@@ -94,20 +98,20 @@
 
 .search-actions {
   display: flex;
-  justify-content: space-between; /* separa buscador y botones */
-  align-items: center;            /* centra verticalmente */
-  gap: 50rem;                      /* espacio entre input y botones */
+  justify-content: space-between; 
+  align-items: center;            
+  gap: 50rem;                      
   margin: 10px;
 }
 
 .search-actions .survey-title-input {
-  flex: 1; /* hace que el input ocupe todo el espacio disponible */
-  margin: 0; /* quita márgenes extra que tenías */
+  flex: 1; 
+  margin: 0; 
 }
 
 .search-actions .actions {
   display: flex;
-  gap: 0.5rem; /* espacio entre botones */
+  gap: 0.5rem; 
 }
 
 
