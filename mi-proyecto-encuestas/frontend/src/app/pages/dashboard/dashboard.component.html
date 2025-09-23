@@ -1,48 +1,95 @@
-<div class="container mt-4">
+
+<div class="dashboard-container">
+
+  <main class="main-content"> 
+
+    <header class="content-header">
+      <img class="logo" src="assets/images/logo.ico" alt="">
+      <h1 class="app-title">Encuestas Dinamicas</h1>
+      <div class="header-actions">
+      </div>
+    
+
   <div class="d-flex justify-content-between align-items-center mb-3">
     <h3>Hola, <b>Usuario</b>.</h3>
-    <input type="text" class="form-control w-25" placeholder="Buscar encuesta..." [(ngModel)]="searchTerm">
+  </div>
+  </header>
+
+
+  <div class="mb-3">
+
+    <nav class="nav-menu">
+        
+        <a class="btn btn-light" 
+          [class.disabled]="!selectedSurveyId" 
+          [routerLink]="['/encuesta/resultados', selectedSurveyId]">Ver Resultados</a>
+
+        <a class="btn btn-light" 
+          [class.disabled]="!selectedSurveyId">Compartir Encuesta</a>
+
+        <a class="btn btn-light" 
+          [class.disabled]="!selectedSurveyId" 
+          [routerLink]="['/encuesta/editar', selectedSurveyId]">Editar Encuesta</a>
+
+    </nav>
+
   </div>
 
-  <nav class="nav-menu mb-3">
-    <a class="btn btn-light" [class.disabled]="!selectedSurveyId" [routerLink]="['/resultados', selectedSurveyId]">Ver Resultados</a>
-    <a class="btn btn-light" [class.disabled]="!selectedSurveyId">Compartir Encuesta</a>
-    <a class="btn btn-light" [class.disabled]="!selectedSurveyId" [routerLink]="['/encuesta/editar', selectedSurveyId]">Editar Encuesta</a>
-    <a class="btn btn-danger" [class.disabled]="!selectedSurveyId" (click)="deleteSelectedSurvey()">Eliminar Encuesta</a>
-  </nav>
 
-  <table class="table table-hover">
-    <thead>
-      <tr>
-        <th></th>
-        <th>Título</th>
-        <th>Descripción</th>
-        <th>Autor</th>
-        <th>Fecha</th>
-        <th>Estado</th>
-        <th>Descargar</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let survey of filteredSurveys">
-        <td>
-          <input type="radio" name="seleccionEncuesta" [value]="survey.idencuesta" (click)="selectSurvey(survey.idencuesta)">
-        </td>
-        <td>{{ survey.nombre }}</td>
-        <td>{{ survey.descripcion }}</td>
-        <td>{{ survey.nombreU }}</td>
-        <td>{{ survey.fecha | date: 'dd/MM/yyyy' }}</td>
-        <td>
-          <button class="btn btn-sm" 
-                  [ngClass]="survey.activo === 'S' ? 'btn-success' : 'btn-danger'"
-                  (click)="changeStatus(survey)">
-            {{ survey.activo === 'S' ? 'Activo' : 'Inactivo' }}
-          </button>
-        </td>
-        <td>
-          <a href="#" class="btn btn-primary">Descargar</a>
-        </td>
-      </tr>
-    </tbody>
-  </table>
+    <div class="search-actions mb-3">
+      <!-- Buscar (izquierda) -->
+      <input type="text" 
+            class="survey-title-input" 
+            placeholder="Buscar encuesta..." 
+            [(ngModel)]="searchTerm">
+
+      <!-- Botones (derecha) -->
+      <div class="actions">
+        <a class="btn btn-secondary me-2" 
+          [class.disabled]="!selectedSurveyId" 
+          (click)="deleteSelectedSurvey()">Eliminar</a>
+
+        <a class="btn btn-secondary" 
+          [routerLink]="['/encuesta/agregar']">Crear</a>
+      </div>
+    </div>
+
+
+  <div class="card-body"> 
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <th></th>
+            <th>Título</th>
+            <th>Descripción</th>
+            <th>Fecha</th>
+            <th>Estado</th>
+            <th>Descargar</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let survey of filteredSurveys">
+            <td>
+              <input type="radio" name="seleccionEncuesta" [value]="survey.idencuesta" (click)="selectSurvey(survey.idencuesta)">
+            </td>
+            <td>{{ survey.nombre }}</td>
+            <td>{{ survey.descripcion }}</td>
+            <td>{{ survey.nombreU }}</td>
+            <td>{{ survey.fecha | date: 'dd/MM/yyyy' }}</td>
+            <td>
+              <button class="btn btn-sm" 
+                      [ngClass]="survey.activo === 'S' ? 'btn-success' : 'btn-danger'"
+                      (click)="changeStatus(survey)">
+                {{ survey.activo === 'S' ? 'Activo' : 'Inactivo' }}
+              </button>
+            </td>
+            <td>
+              <a href="#" class="btn btn-primary">Descargar</a>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+    </div>
+  </main>
 </div>

@@ -1,0 +1,165 @@
+/* Variables de Color */
+.dashboard-container {
+  display: flex; 
+  min-height: 100vh;
+  background-color: var(--bg-dark);
+  color: var(--text-primary);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+}
+
+.main-content {
+  flex-grow: 1;   
+
+  .content-header {
+    
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 20px;
+    border-bottom: 1px solid #fff;
+    background-color: #181F2D;
+
+    .app-title {
+      font-size: 1.5rem;
+        margin: 0; 
+        flex: 1; 
+      
+    }
+  }
+}
+
+  .logo {
+    font-size: 1.5rem;
+    width: 30px;      
+    height: auto;
+    margin-right: 10px; }
+
+
+/* --- Botones --- */
+.btn-danger.btn-crear {
+  border: 1px solid var(--border-color);
+  color: white;
+  padding: px 16px;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+
+
+  i {
+    margin-right: 8px;
+  }
+}
+
+.nav-menu a {
+  color: white !important;       /* siempre blanco */
+  text-decoration: none;         /* quita el subrayado */
+}
+
+.nav-menu a:hover {
+    
+  color: #ddd !important;        /* un gris clarito al pasar el mouse */
+}
+
+.btn-secondary:hover {
+  background-color: var(--border-color);
+}
+
+.btn-primary {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+  color: #fff;
+
+  &:hover {
+    background-color: var(--primary-hover);
+    border-color: var(--primary-hover);
+  }
+}
+
+.btn-back1 {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-primary);
+  font-size: 18px;
+  margin-right: 12px; 
+}
+
+.text-end {
+  color: var(--primary-color);
+    font-weight: 600;
+    border-radius: 4px;
+    padding: 4px 8px;
+}
+
+.search-actions {
+  display: flex;
+  justify-content: space-between; /* separa buscador y botones */
+  align-items: center;            /* centra verticalmente */
+  gap: 50rem;                      /* espacio entre input y botones */
+  margin: 10px;
+}
+
+.search-actions .survey-title-input {
+  flex: 1; /* hace que el input ocupe todo el espacio disponible */
+  margin: 0; /* quita márgenes extra que tenías */
+}
+
+.search-actions .actions {
+  display: flex;
+  gap: 0.5rem; /* espacio entre botones */
+}
+
+
+
+/* --- Tabla --- */
+
+.card-body {
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    
+    p {
+      margin: 0;
+      font-size: 1rem;
+      color: var(--text-primary);
+    }
+  }
+
+.table-hover {
+  border: 1px solid var(--border-color);
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+  background-color: var(--bg-dark);
+  color: var(--text-primary);
+
+    th, td {
+      padding: 12px 15px;
+      border-bottom: 1px solid var(--border-color);
+      text-align: left;
+    }
+
+    th {
+      background-color: var(--border-color);
+      font-weight: 600;
+    }
+    
+}
+
+ .survey-title-input {
+    background-color: transparent;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 5px;
+    font-size: 1rem;
+    color: var(--text-primary);
+    margin-bottom: 10px;
+    margin-top: 20px;
+    margin-block: 20px;
+
+    &:focus {
+      outline: none;
+      border-color: var(--primary-color);
+    }
+  }
