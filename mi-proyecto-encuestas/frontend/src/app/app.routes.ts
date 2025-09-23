@@ -10,6 +10,7 @@ import { EncuestaEditarComponent } from './pages/encuesta-editar/encuesta-editar
 import { EncuestaResponderComponent } from './pages/encuesta-responder/encuesta-responder.component';
 import { EncuestaResultadosComponent } from './pages/encuesta-resultados/encuesta-resultados.component';
 import { TokenExpiradoComponent } from './pages/token-expirado/token-expirado.component';
+import { AboutusComponent } from './pages/home/aboutus/aboutus.component';
 
 
 export const routes: Routes = [
@@ -22,6 +23,7 @@ export const routes: Routes = [
     { path: 'encuesta/responder/:id', component: EncuestaResponderComponent },
     { path: 'encuesta/resultados/:id', component: EncuestaResultadosComponent },
     { path: 'token-expirado', component: TokenExpiradoComponent },
+    { path: 'aboutus', component: AboutusComponent }, // La página principal
     
 
     // Redirige cualquier ruta no encontrada a la página principal
