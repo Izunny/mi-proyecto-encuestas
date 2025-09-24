@@ -25,14 +25,12 @@ export class EncuestasService {
     const url = `${this.apiUrl}/surveys/${surveyId}/status`;
     return this.http.put(url, { nuevoEstado: newStatus });
   }
-  // --- Aquí puedes agregar los métodos para obtener TODAS las encuestas que mencionamos antes ---
   getAllSurveys(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/surveys`); // Suponiendo que tienes este endpoint
   }
 
 
     createSurvey(surveyData: any): Observable<any> {
-    // Llama a la nueva ruta POST que creamos en el backend
     return this.http.post(`${this.apiUrl}/surveys`, surveyData);
   }
 

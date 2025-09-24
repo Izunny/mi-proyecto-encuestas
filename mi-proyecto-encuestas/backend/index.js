@@ -6,8 +6,8 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// 🔹 Conexión única a la BD
-// Correcto:
+//Conexión única a la BD
+
 const db = mysql.createPool({
   host: 'localhost',
   user: 'root',
@@ -15,7 +15,7 @@ const db = mysql.createPool({
   database: 'db_encuestas'
 });
 
-// ... (todas tus rutas de usuarios y register van aquí, no cambian)
+
 
 // CREATE
 app.post('/usuarios', (req, res) => {
@@ -121,7 +121,7 @@ app.get('/api/surveys/user/:userId', (req, res) => {
 });
 
 
-// 🔹 Servidor corriendo en un solo puerto
+//Servidor corriendo en un solo puerto
 const PORT = 3000;
 app.listen(PORT, () => {
   console.log(`🚀 Servidor backend corriendo en http://localhost:${PORT}`);
@@ -155,38 +155,29 @@ app.put('/api/surveys/:surveyId/status', (req, res) => {
 });
 
 
-// --- 👇👇 INICIO: CÓDIGO PARA CREAR ENCUESTAS 👇👇 ---
-
 // CREAR UNA NUEVA ENCUESTA COMPLETA (CON PREGUNTAS Y OPCIONES)
 app.post('/api/surveys', async (req, res) => {
   const { nombre, descripcion, fecha, activo, idusuario, preguntas } = req.body;
 
-  // Obtenemos una conexión del pool para poder usar transacciones
   const connection = await db.promise().getConnection();
 
   try {
-    // 1. INICIAMOS LA TRANSACCIÓN
     await connection.beginTransaction();
 
-    // 2. INSERTAMOS LA INFORMACIÓN PRINCIPAL DE LA ENCUESTA
     const surveyQuery = 'INSERT INTO enc_encuestasm (nombre, descripcion, idusuario, fecha, activo) VALUES (?, ?, ?, ?, ?)';
     const [surveyResult] = await connection.query(surveyQuery, [nombre, descripcion, idusuario, fecha, activo]);
     const newSurveyId = surveyResult.insertId;
 
-    // 3. RECORREMOS CADA PREGUNTA PARA INSERTARLA
     if (preguntas && preguntas.length > 0) {
       for (const pregunta of preguntas) {
         const { textopregunta, idtipopregunta, requerida, opciones } = pregunta;
         
-        // --- ✨ ESTA ES LA CORRECCIÓN CLAVE ✨ ---
-        // Convertimos el valor booleano (true/false) a 'S' o 'N'
         const esRequerida = requerida ? 'S' : 'N';
 
         const questionQuery = 'INSERT INTO enc_pregunta (idencuesta, textopregunta, requerida, idtipopregunta) VALUES (?, ?, ?, ?)';
         const [questionResult] = await connection.query(questionQuery, [newSurveyId, textopregunta, esRequerida, idtipopregunta]);
         const newQuestionId = questionResult.insertId;
 
-        // 4. SI LA PREGUNTA TIENE OPCIONES, LAS INSERTAMOS
         if (opciones && opciones.length > 0 && (idtipopregunta === '3' || idtipopregunta === '4')) {
           for (const opcion of opciones) {
             const optionQuery = 'INSERT INTO enc_opcion (idpregunta, opcion) VALUES (?, ?)';
@@ -196,20 +187,16 @@ app.post('/api/surveys', async (req, res) => {
       }
     }
 
-    // 5. SI TODO SALIÓ BIEN, CONFIRMAMOS LOS CAMBIOS
     await connection.commit();
     res.status(201).json({ message: '¡Encuesta creada con éxito!', surveyId: newSurveyId });
 
   } catch (err) {
-    // 6. SI ALGO FALLÓ, REVERTIMOS TODO
     await connection.rollback();
     console.error('Error al crear la encuesta:', err); // Este es el error que necesitas revisar
     res.status(500).json({ error: 'Error interno del servidor al crear la encuesta.' });
 
   } finally {
-    // 7. SIEMPRE LIBERAMOS LA CONEXIÓN AL FINAL
     connection.release();
   }
 });
 
-// --- 👆👆 FIN: CÓDIGO PARA CREAR ENCUESTAS 👆👆 ---
