@@ -17,36 +17,29 @@ export class DashboardComponent implements OnInit {
   selectedSurveyId: number | null = null;
   searchTerm: string = '';
 
-  // === PROPIEDADES NUEVAS ===
-  viewMode: 'user' | 'all' = 'user'; // Por defecto, muestra las del usuario
-  currentUserId: number = 1; // Debes obtener el ID del usuario logueado
+  viewMode: 'user' | 'all' = 'user'; 
+  currentUserId: number = 1; 
 
   constructor(private encuestasService: EncuestasService) { }
 
   ngOnInit(): void {
-    // Al iniciar, carga las encuestas del usuario por defecto
     this.loadUserSurveys();
   }
 
-  // === MÉTODOS NUEVOS Y ACTUALIZADOS ===
-
-  // Carga las encuestas del usuario actual
   loadUserSurveys(): void {
     this.encuestasService.getSurveysByUser(this.currentUserId).subscribe((data: any[]) => {
       this.surveys = data;
-      this.filterSurveys(); // Llama al filtro después de cargar
+      this.filterSurveys(); 
     });
   }
 
-  // Carga TODAS las encuestas
   loadAllSurveys(): void {
     this.encuestasService.getAllSurveys().subscribe((data: any[]) => {
       this.surveys = data;
-      this.filterSurveys(); // Llama al filtro después de cargar
+      this.filterSurveys(); 
     });
   }
 
-  // Función para cambiar de vista (la que llamaba el botón)
   toggleView(): void {
     this.viewMode = this.viewMode === 'user' ? 'all' : 'user';
     if (this.viewMode === 'user') {
@@ -56,7 +49,6 @@ export class DashboardComponent implements OnInit {
     }
   }
 
-  // Función de filtrado (la que llamaba el input)
   filterSurveys(): void {
     if (!this.searchTerm) {
       this.filteredSurveys = this.surveys;

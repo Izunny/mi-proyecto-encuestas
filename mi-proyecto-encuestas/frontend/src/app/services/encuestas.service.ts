@@ -35,4 +35,14 @@ export class EncuestasService {
   }
 
 
+    // Obtiene los datos completos de una sola encuesta por su ID
+  getSurveyById(id: number): Observable<any> {
+    return this.http.get(`${this.apiUrl}/surveys/${id}`);
+  }
+
+  // Envía los datos actualizados de una encuesta al backend
+  updateSurvey(id: number, surveyData: any): Observable<any> {
+    return this.http.put(`${this.apiUrl}/surveys/${id}`, surveyData);
+  }
+
 }

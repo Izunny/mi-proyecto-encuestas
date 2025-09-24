@@ -200,3 +200,95 @@ app.post('/api/surveys', async (req, res) => {
   }
 });
 
+
+// OBTENER UNA ENCUESTA ESPECÍFICA POR SU ID (CON PREGUNTAS Y OPCIONES)
+app.get('/api/surveys/:id', async (req, res) => {
+  const { id } = req.params;
+  const connection = await db.promise().getConnection();
+
+  try {
+    // 1. Verificamos si la encuesta ya tiene respuestas
+    const [responses] = await connection.query('SELECT COUNT(*) as responseCount FROM enc_respuesta WHERE idencuesta = ?', [id]);
+    const hasResponses = responses[0].responseCount > 0;
+
+    // 2. Obtenemos la información principal de la encuesta
+    const [surveyRows] = await connection.query('SELECT * FROM enc_encuestasm WHERE idencuesta = ?', [id]);
+    
+    if (surveyRows.length === 0) {
+      connection.release();
+      return res.status(404).json({ error: 'Encuesta no encontrada.' });
+    }
+    const encuesta = surveyRows[0];
+    encuesta.hasResponses = hasResponses; // ✨ Añadimos esta información a la respuesta
+
+    // 3. Obtenemos el resto (preguntas y opciones)
+    const [questions] = await connection.query('SELECT * FROM enc_pregunta WHERE idencuesta = ?', [id]);
+    
+    for (const pregunta of questions) {
+      if (pregunta.idtipopregunta === 3 || pregunta.idtipopregunta === 4) {
+        const [options] = await connection.query('SELECT * FROM enc_opcion WHERE idpregunta = ?', [pregunta.idpregunta]);
+        pregunta.opciones = options;
+      } else {
+        pregunta.opciones = [];
+      }
+      pregunta.requerida = pregunta.requerida === 'S';
+    }
+
+    encuesta.preguntas = questions;
+    res.json(encuesta);
+
+  } catch (err) {
+    console.error(`Error al obtener la encuesta ${id}:`, err);
+    res.status(500).json({ error: 'Error interno del servidor.' });
+  } finally {
+    if (connection) connection.release();
+  }
+});
+
+
+// ACTUALIZAR UNA ENCUESTA EXISTENTE (CON LÓGICA DE SEGURIDAD)
+app.put('/api/surveys/:id', async (req, res) => {
+  const { id: surveyId } = req.params;
+  const { nombre, descripcion, activo, preguntas } = req.body;
+  const connection = await db.promise().getConnection();
+
+  try {
+    await connection.beginTransaction();
+
+    const [responses] = await connection.query('SELECT COUNT(*) as responseCount FROM enc_respuesta WHERE idencuesta = ?', [surveyId]);
+    const hasResponses = responses[0].responseCount > 0;
+
+    await connection.query('UPDATE enc_encuestasm SET nombre = ?, descripcion = ?, activo = ? WHERE idencuesta = ?', [nombre, descripcion, activo, surveyId]);
+
+    if (!hasResponses) {
+      const [oldQuestions] = await connection.query('SELECT idpregunta FROM enc_pregunta WHERE idencuesta = ?', [surveyId]);
+      if (oldQuestions.length > 0) {
+        const oldQuestionIds = oldQuestions.map(q => q.idpregunta);
+        await connection.query('DELETE FROM enc_opcion WHERE idpregunta IN (?)', [oldQuestionIds]);
+        await connection.query('DELETE FROM enc_pregunta WHERE idencuesta = ?', [surveyId]);
+      }
+
+      for (const pregunta of preguntas) {
+        const esRequerida = pregunta.requerida ? 'S' : 'N';
+        const [questionResult] = await connection.query('INSERT INTO enc_pregunta (idencuesta, textopregunta, requerida, idtipopregunta) VALUES (?, ?, ?, ?)', [surveyId, pregunta.textopregunta, esRequerida, pregunta.idtipopregunta]);
+        const newQuestionId = questionResult.insertId;
+
+        if (pregunta.opciones && (pregunta.idtipopregunta == '3' || pregunta.idtipopregunta == '4')) {
+          for (const opcion of pregunta.opciones) {
+            await connection.query('INSERT INTO enc_opcion (idpregunta, opcion) VALUES (?, ?)', [newQuestionId, opcion.opcion]);
+          }
+        }
+      }
+    }
+
+    await connection.commit();
+    res.json({ message: '¡Encuesta actualizada con éxito!', surveyId: surveyId });
+
+  } catch (err) {
+    await connection.rollback();
+    console.error(`Error al actualizar la encuesta ${surveyId}:`, err);
+    res.status(500).json({ error: 'Error interno del servidor.' });
+  } finally {
+    connection.release();
+  }
+});

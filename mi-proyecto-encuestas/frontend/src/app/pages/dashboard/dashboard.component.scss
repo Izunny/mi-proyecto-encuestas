@@ -167,3 +167,18 @@
       border-color: var(--primary-color);
     }
   }
+
+.btn-sm {
+  background: none !important;   
+  border: none !important;       
+  color: purple !important;     
+  text-decoration: none;         
+  padding: 0;                   
+  font-size: 1rem;              
+  cursor: pointer;             
+}
+
+.btn-sm:hover {
+  color: rgb(71, 6, 71) !important;   
+  text-decoration: underline;    
+}

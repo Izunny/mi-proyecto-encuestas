@@ -1,1 +1,85 @@
-<p>encuesta-editar works!</p>
+<div class="editor-container">
+  <main class="main-content">
+    <header class="content-header">
+      <button class="btn btn-back1" (click)="goBack()">
+        <i class="fas fa-arrow-left"></i>
+      </button>
+
+      <h1 class="app-title">Encuestas Dinamicas</h1>
+      <div class="header-actions">
+        <button class="btn btn-secondary"><i class="fas fa-download"></i> Descargar</button>
+        <button class="btn btn-secondary"><i class="fas fa-share-alt"></i> Compartir</button>
+      </div>
+    </header>
+
+    <div class="editor-container">
+      <aside class="sidebar">
+        <nav class="sidebar-nav">
+          <a href="#" class="nav-item">
+            <i class="fas fa-chart-bar"></i>
+            <span>Resultados</span>
+          </a>
+          <a href="#" class="nav-item1">
+            <i class="fas fa-cog"></i>
+            <span>Ajustes</span>
+          </a>
+        </nav>
+      </aside>
+
+      <main class="main-content">
+        <form [formGroup]="surveyForm" (ngSubmit)="onSubmit()" class="survey-editor">
+          <input type="text" class="survey-title-input" placeholder="Escribe el título de tu encuesta..." formControlName="nombre">
+          <div class="question-list" formArrayName="preguntas">
+            <div *ngFor="let pregunta of preguntas().controls; let i = index" [formGroupName]="i" class="question-card">
+              <div class="card-header">
+                <div class="question-info">
+                  <i class="fas fa-list-ul question-icon"></i>
+                  <span class="question-number">Pregunta {{ i + 1 }}</span>
+                </div>
+                <div class="question-actions">
+                  <button type="button" (click)="quitarPregunta(i)" class="btn-icon">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </div>
+              </div>
+              <div class="card-body">
+                <input type="text" class="question-text-input" placeholder="Escribe tu pregunta aquí..." formControlName="textopregunta">
+                <div class="question-options">
+                  <select formControlName="idtipopregunta" class="form-control-select">
+                    <option value="1">Texto corto</option>
+                    <option value="2">Párrafo</option>
+                    <option value="3">Opción única</option>
+                    <option value="4">Opción múltiple</option>
+                  </select>
+                  <div class="form-check">
+                    <input type="checkbox" formControlName="requerida" class="form-check-input">
+                    <label class="form-check-label">Requerida</label>
+                  </div>
+                </div>
+                <div *ngIf="pregunta.get('idtipopregunta')?.value == '3' || pregunta.get('idtipopregunta')?.value == '4'" class="options-container" formArrayName="opciones">
+                  <div *ngFor="let opcion of opciones(i).controls; let j = index" [formGroupName]="j" class="option-item">
+                    <input type="text" class="option-input" placeholder="Opción {{ j + 1 }}" formControlName="opcion">
+                    <button type="button" (click)="quitarOpcion(i, j)" class="btn-icon-sm">
+                      <i class="fas fa-times"></i>
+                    </button>
+                  </div>
+                  <button type="button" (click)="agregarOpcion(i)" class="btn btn-secondary-text">
+                    <i class="fas fa-plus"></i> Agregar opción
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="form-actions">
+            <button type="button" (click)="agregarPregunta()" class="btn btn-primary add-question-btn">
+              Agregar una pregunta
+            </button>
+            <button type="submit" class="btn btn-success save-survey-btn">
+              <i class="fas fa-save"></i> Guardar Encuesta
+            </button>
+          </div>
+        </form>
+      </main>
+    </div>
+  </main>
+</div>
