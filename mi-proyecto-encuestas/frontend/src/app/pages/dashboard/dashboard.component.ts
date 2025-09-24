@@ -40,7 +40,6 @@ export class DashboardComponent implements OnInit {
 
   // Carga TODAS las encuestas
   loadAllSurveys(): void {
-    // Asegúrate de tener este método en tu servicio (EncuestasService)
     this.encuestasService.getAllSurveys().subscribe((data: any[]) => {
       this.surveys = data;
       this.filterSurveys(); // Llama al filtro después de cargar
@@ -69,24 +68,19 @@ export class DashboardComponent implements OnInit {
   }
 
   changeStatus(survey: any): void {
-    // 1. Determina cuál será el nuevo estado
     const nuevoEstado = survey.activo === 'S' ? 'N' : 'S';
     const surveyId = survey.idencuesta;
 
-    // 2. Llama al servicio para actualizar en la base de datos
     this.encuestasService.updateSurveyStatus(surveyId, nuevoEstado).subscribe({
       next: () => {
-        // 3. Si el backend confirma, actualiza la vista al instante
         survey.activo = nuevoEstado;
       },
       error: (err: any) => {
-        // 4. Si hay un error, muéstralo
         alert('Error al cambiar el estado: ' + err.message);
       }
     });
   }
 
-  // --- Tus métodos existentes ---
   selectSurvey(id: number): void {
     this.selectedSurveyId = id;
   }
@@ -97,7 +91,6 @@ export class DashboardComponent implements OnInit {
       this.encuestasService.deleteSurvey(this.selectedSurveyId).subscribe({
         next: () => {
           alert('Encuesta eliminada con éxito.');
-          // Recarga la vista actual
           this.viewMode === 'user' ? this.loadUserSurveys() : this.loadAllSurveys();
           this.selectedSurveyId = null;
         },

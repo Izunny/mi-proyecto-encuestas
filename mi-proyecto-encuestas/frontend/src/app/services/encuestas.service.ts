@@ -31,4 +31,10 @@ export class EncuestasService {
   }
 
 
+    createSurvey(surveyData: any): Observable<any> {
+    // Llama a la nueva ruta POST que creamos en el backend
+    return this.http.post(`${this.apiUrl}/surveys`, surveyData);
+  }
+
+
 }
