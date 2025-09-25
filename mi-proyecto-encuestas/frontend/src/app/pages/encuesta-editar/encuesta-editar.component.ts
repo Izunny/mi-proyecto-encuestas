@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-// --- 👇👇 1. ASEGÚRATE DE QUE ESTOS IMPORTS ESTÉN AQUÍ 👇👇 ---
+
 import { CommonModule } from '@angular/common'; 
 import { ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -8,7 +8,7 @@ import { EncuestasService } from '../../services/encuestas.service';
 @Component({
   selector: 'app-encuesta-editar',
   standalone: true,
-  // --- 👇👇 2. AÑADE LOS MÓDULOS A LA CAJA DE HERRAMIENTAS 👇👇 ---
+
   imports: [ 
     CommonModule, 
     ReactiveFormsModule 
@@ -17,7 +17,7 @@ import { EncuestasService } from '../../services/encuestas.service';
   styleUrls: ['./encuesta-editar.component.scss']
 })
 export class EncuestaEditarComponent implements OnInit {
-  // --- 👇👇 3. AQUÍ ESTÁN TODAS LAS VARIABLES Y FUNCIONES QUE TU HTML NECESITA 👇👇 ---
+
   surveyForm!: FormGroup;
   surveyId!: number;
   isLoading = true;
