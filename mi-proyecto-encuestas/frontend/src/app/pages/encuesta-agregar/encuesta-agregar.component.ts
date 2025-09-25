@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common'; 
 import { ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
-import { Router } from '@angular/router'; // 1. IMPORTAMOS Router para navegar
-import { EncuestasService } from '../../services/encuestas.service'; // 2. IMPORTAMOS nuestro servicio
+import { Router } from '@angular/router'; 
+import { EncuestasService } from '../../services/encuestas.service'; 
 
 @Component({
   selector: 'app-encuesta-agregar',

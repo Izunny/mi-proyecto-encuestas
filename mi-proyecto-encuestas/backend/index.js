@@ -155,7 +155,7 @@ app.put('/api/surveys/:surveyId/status', (req, res) => {
 });
 
 
-// CREAR UNA NUEVA ENCUESTA COMPLETA (CON PREGUNTAS Y OPCIONES)
+// CREAR UNA NUEVA ENCUESTA 
 app.post('/api/surveys', async (req, res) => {
   const { nombre, descripcion, fecha, activo, idusuario, preguntas } = req.body;
 

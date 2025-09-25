@@ -26,7 +26,7 @@ export class EncuestasService {
     return this.http.put(url, { nuevoEstado: newStatus });
   }
   getAllSurveys(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/surveys`); // Suponiendo que tienes este endpoint
+    return this.http.get<any[]>(`${this.apiUrl}/surveys`); 
   }
 
 
