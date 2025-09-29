@@ -25,7 +25,7 @@
           [routerLink]="['/encuesta/resultados', selectedSurveyId]">Ver Resultados</a>
 
         <a class="btn btn-light" 
-          [class.disabled]="!selectedSurveyId">Compartir Encuesta</a>
+          [routerLink]="['/encuesta/responder', selectedSurveyId]">Compartir Encuesta</a>
 
         <a class="btn btn-light" 
           [class.disabled]="!selectedSurveyId" 

@@ -98,7 +98,7 @@ app.get('/api/surveys', (req, res) => {
   });
 });
 
-// OBTENER LAS ENCUESTAS DE UN USUARIO ESPECÍFICO
+// OBTENER LAS ENCUESTAS DE UN USUARIO ESPECIFICO
 app.get('/api/surveys/user/:userId', (req, res) => {
   const { userId } = req.params;
 
@@ -129,9 +129,8 @@ app.listen(PORT, () => {
 
 app.put('/api/surveys/:surveyId/status', (req, res) => {
   const { surveyId } = req.params;
-  const { nuevoEstado } = req.body; // 'S' o 'N'
+  const { nuevoEstado } = req.body; 
 
-  // Validación simple
   if (!['S', 'N'].includes(nuevoEstado)) {
     return res.status(400).json({ error: 'Estado no válido. Debe ser S o N.' });
   }
@@ -201,17 +200,15 @@ app.post('/api/surveys', async (req, res) => {
 });
 
 
-// OBTENER UNA ENCUESTA ESPECÍFICA POR SU ID (CON PREGUNTAS Y OPCIONES)
+// OBTENER UNA ENCUESTA ESPECIFICA POR SU ID (CON PREGUNTAS Y OPCIONES)
 app.get('/api/surveys/:id', async (req, res) => {
   const { id } = req.params;
   const connection = await db.promise().getConnection();
 
   try {
-    // 1. Verificamos si la encuesta ya tiene respuestas
     const [responses] = await connection.query('SELECT COUNT(*) as responseCount FROM enc_respuesta WHERE idencuesta = ?', [id]);
     const hasResponses = responses[0].responseCount > 0;
 
-    // 2. Obtenemos la información principal de la encuesta
     const [surveyRows] = await connection.query('SELECT * FROM enc_encuestasm WHERE idencuesta = ?', [id]);
     
     if (surveyRows.length === 0) {
@@ -219,9 +216,8 @@ app.get('/api/surveys/:id', async (req, res) => {
       return res.status(404).json({ error: 'Encuesta no encontrada.' });
     }
     const encuesta = surveyRows[0];
-    encuesta.hasResponses = hasResponses; // ✨ Añadimos esta información a la respuesta
+    encuesta.hasResponses = hasResponses; // 
 
-    // 3. Obtenemos el resto (preguntas y opciones)
     const [questions] = await connection.query('SELECT * FROM enc_pregunta WHERE idencuesta = ?', [id]);
     
     for (const pregunta of questions) {
@@ -246,7 +242,7 @@ app.get('/api/surveys/:id', async (req, res) => {
 });
 
 
-// ACTUALIZAR UNA ENCUESTA EXISTENTE (CON LÓGICA DE SEGURIDAD)
+// ACTUALIZAR UNA ENCUESTA EXISTENTE
 app.put('/api/surveys/:id', async (req, res) => {
   const { id: surveyId } = req.params;
   const { nombre, descripcion, activo, preguntas } = req.body;
@@ -288,6 +284,60 @@ app.put('/api/surveys/:id', async (req, res) => {
     await connection.rollback();
     console.error(`Error al actualizar la encuesta ${surveyId}:`, err);
     res.status(500).json({ error: 'Error interno del servidor.' });
+  } finally {
+    connection.release();
+  }
+});
+
+// GUARDAR LAS RESPUESTAS DE UNA ENCUESTA
+app.post('/api/responses', async (req, res) => {
+  const { idencuesta, idusuario, respuestas } = req.body;
+
+  if (!idencuesta || !idusuario || !respuestas) {
+    return res.status(400).json({ error: 'Faltan datos para guardar la respuesta.' });
+  }
+
+  const connection = await db.promise().getConnection();
+
+  try {
+    await connection.beginTransaction();
+
+    const responseQuery = 'INSERT INTO enc_respuesta (idencuesta, idusuario, fecha) VALUES (?, ?, NOW())';
+    const [responseResult] = await connection.query(responseQuery, [idencuesta, idusuario]);
+    const newResponseId = responseResult.insertId; 
+
+    for (const idpregunta of Object.keys(respuestas)) {
+      const respuesta = respuestas[idpregunta];
+
+      if (respuesta == null) continue;
+
+      if (Array.isArray(respuesta)) {
+        for (const idopcion of respuesta) {
+          await connection.query(
+            'INSERT INTO enc_respuestaopcion (idopciones, idrespuestas, idpregunta) VALUES (?, ?, ?)',
+            [idopcion, newResponseId, idpregunta]
+          );
+        }
+      } else if (typeof respuesta === 'number') {
+        await connection.query(
+          'INSERT INTO enc_respuestaopcion (idopciones, idrespuestas, idpregunta) VALUES (?, ?, ?)',
+          [respuesta, newResponseId, idpregunta]
+        );
+      } else if (typeof respuesta === 'string' && respuesta.trim() !== '') {
+        await connection.query(
+          'INSERT INTO enc_respuestatexto (respuesta, idrespuestas, idpregunta) VALUES (?, ?, ?)',
+          [respuesta.trim(), newResponseId, idpregunta]
+        );
+      }
+    }
+
+    await connection.commit();
+    res.status(201).json({ message: '¡Gracias por tus respuestas!' });
+
+  } catch (err) {
+    await connection.rollback();
+    console.error('Error al guardar las respuestas:', err);
+    res.status(500).json({ error: 'Error interno del servidor al guardar las respuestas.' });
   } finally {
     connection.release();
   }
