@@ -1,4 +1,4 @@
-/* Variables de Color */
+/* --- Variables y Estilos Base--- */
 .editor-container {
   display: flex; 
   min-height: 100vh;
@@ -6,25 +6,22 @@
   color: var(--text-primary);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
 }
+.editor-body {
+  padding: 20px 24px;
+}
 
-/* --- Barra Lateral --- */
 .sidebar {
   width: 200px;
   flex-shrink: 0;
   background-color: var(--bg-sidebar);
   border-right: 1px solid var(--border-color);
-  
-  display: flex; 
-
-  // ESTILOS PARA EL CONTENEDOR DE LOS LINKS
+  display: flex;
   .sidebar-nav {
-    width: 100%;            
-    display: flex;           
-    flex-direction: column;  
-    height: auto;            
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    height: auto;
   }
-
-
   .nav-item, .nav-item1 {
     display: flex;
     align-items: center;
@@ -33,76 +30,62 @@
     text-decoration: none;
     color: var(--text-primary);
     margin-bottom: 8px;
-
     i {
       margin-right: 10px;
       width: 20px;
     }
-
     &:hover {
       background-color: var(--border-color);
     }
   }
-
   .nav-item1 {
     margin-top: auto;
   }
 }
 
-/* --- Contenido Principal --- */
 .main-content {
-  flex-grow: 1;   
- 
-
+  flex-grow: 1;
   .content-header {
-    
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 8px 20px;
     border-bottom: 1px solid #fff;
     background-color: #181F2D;
-
     .app-title {
       font-size: 1.5rem;
-        margin: 0; 
-        flex: 1; 
-      
+      margin: 0;
+      flex: 1;
     }
   }
 }
 
-/* --- Botones --- */
 .btn {
   border: 1px solid var(--border-color);
-  background-color: #181F2D;
+  background-color: #313b4d;
   color: var(--text-primary);
   padding: 8px 16px;
   border-radius: 6px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease-in-out;
-
   i {
     margin-right: 8px;
   }
 }
-
 .btn-secondary:hover {
   background-color: var(--border-color);
 }
-
 .btn-primary {
   background-color: var(--primary-color);
   border-color: var(--primary-color);
   color: #fff;
-
+ 
   &:hover {
     background-color: var(--primary-hover);
     border-color: var(--primary-hover);
   }
 }
-
 .btn-back1 {
   background: none;
   border: none;
@@ -112,7 +95,106 @@
   margin-right: 12px; 
 }
 
-/* --- Editor de Encuesta --- */
+
+/* --- ESTILOS PARA LOS MENUS  --- */
+
+.form-actions {
+  display: flex;
+  justify-content: space-between; 
+  align-items: center;
+  padding-top: 20px;
+}
+
+.dropdown-container {
+  position: relative;
+  display: inline-block;
+}
+
+.dropdown-menu {
+  position: absolute;
+  background-color: #43136E;
+  border: 1px solid #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(113, 25, 116, 0.15);
+  z-index: 1000;
+  width: 220px;
+  padding: 4px 0; 
+  
+
+  a {
+    display: flex;
+    align-items: center;
+    padding: 10px 16px;
+    color: #ffffff;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    i {
+      margin-right: 12px;
+      width: 20px;
+      text-align: center;
+      color: #ffffff;
+    }
+    &:hover {
+      background-color: #5a2c82; 
+    }
+  }
+}
+
+/* posicionamiento específico para el menu principal "Agregar Pregunta" */
+.form-actions .dropdown-menu {
+  bottom: 100%;
+  left: 0;
+  margin-bottom: 10px;
+}
+
+/* posicionamiento específico para el menu del engranaje */
+.question-actions .dropdown-menu {
+  right: 0;
+  top: 100%;
+  margin-top: 8px;
+  width: 180px;
+
+  .dropdown-divider {
+    height: 1px;
+    margin: 4px 0;
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+  .text-danger {
+    color: #ff8a80 !important;
+    i { color: #ff8a80 !important; }
+  }
+}
+
+/* estilos para el submenu */
+.dropdown-submenu {
+  position: relative; 
+
+  .dropdown-menu {
+    display: none; 
+    position: absolute;
+    left: 100%;
+    
+    top: -5px; 
+    margin-left: 1px;
+  }
+
+  &:hover > .dropdown-menu {
+    display: block;
+  }
+
+  .submenu-arrow {
+    margin-left: auto;
+    font-size: 0.8em;
+    opacity: 0.7;
+  }
+}
+
+.fa-check-square {
+  color: #80d8ff !important; 
+}
+
+
 .survey-editor {
   max-width: 800px;
   margin: 0 auto;
@@ -122,26 +204,21 @@
     background-color: transparent;
     border: 1px solid var(--border-color);
     border-radius: 6px;
-    padding: 16px;
+    padding: 10px;
     font-size: 1.5rem;
     color: var(--text-primary);
     margin-bottom: 10px;
     margin-top: 20px;
     margin-block: 20px;
+    
 
     &:focus {
       outline: none;
       border-color: var(--primary-color);
     }
   }
-  
-  .add-question-btn {
-    display: block;
-    margin: 24px auto;
-  }
 }
 
-/* --- Tarjeta de Pregunta --- */
 .question-card {
   background-color: var(--bg-sidebar);
   border: 1px solid var(--border-color);
@@ -155,41 +232,46 @@
     padding: 12px 16px;
     border-bottom: 1px solid var(--border-color);
 
-    .question-info, .question-actions {
+    .question-info {
       display: flex;
       align-items: center;
       gap: 16px;
       color: var(--text-secondary);
     }
-    
-    .vote-count {
-      font-size: 0.8rem;
-    }
   }
   
   .card-body {
     padding: 16px;
-    
-    p {
-      margin: 0;
-      font-size: 1rem;
-      color: var(--text-primary);
-    }
   }
 }
 
-/* --- Opciones de Pregunta --- */
-.question-text-input
-{
-  width: 80%;
+.question-text-input {
+  width: 100%; 
   background-color: transparent;
   border: 1px solid var(--border-color);
   border-radius: 6px;
-  padding: 12px;
+  padding: 12px 2px;
   font-size: 1rem;
   color: var(--text-primary);
   margin-bottom: 12px;
+  
 
+  &:focus {
+    outline: none;
+    border-color: var(--primary-color);
+  }
+}
+
+.option-input {
+  width: 50%;
+  background-color: transparent;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 10px;
+  font-size: 1rem;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+  margin-right: 8px;
   &:focus {
     outline: none;
     border-color: var(--primary-color);

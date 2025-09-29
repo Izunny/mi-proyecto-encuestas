@@ -16,6 +16,10 @@ import { EncuestasService } from '../../services/encuestas.service';
 })
 export class EncuestaAgregarComponent implements OnInit {
   surveyForm!: FormGroup;
+  
+  
+  public isAddQuestionMenuOpen = false; 
+  public openQuestionMenuIndex: number | null = null; 
 
   constructor(
     private fb: FormBuilder,
@@ -34,25 +38,60 @@ export class EncuestaAgregarComponent implements OnInit {
     });
   }
 
+  // --- METODOS PARA MANEJAR LOS MENUS DE CADA PREGUNTA ---
+
+  toggleQuestionMenu(index: number): void {
+    this.openQuestionMenuIndex = this.openQuestionMenuIndex === index ? null : index;
+  }
+
+  toggleRequerida(index: number): void {
+    const requeridaControl = this.preguntas().at(index).get('requerida');
+    if (requeridaControl) {
+      requeridaControl.patchValue(!requeridaControl.value);
+    }
+    this.openQuestionMenuIndex = null; 
+  }
+
+  cambiarTipoPregunta(preguntaIndex: number, nuevoTipo: string): void {
+    const preguntaFormGroup = this.preguntas().at(preguntaIndex) as FormGroup;
+    const opcionesFormArray = preguntaFormGroup.get('opciones') as FormArray;
+
+    preguntaFormGroup.get('idtipopregunta')?.setValue(nuevoTipo);
+
+  
+    if (nuevoTipo === '3' || nuevoTipo === '4') {
+      if (opcionesFormArray.length === 0) {
+        opcionesFormArray.push(this.nuevaOpcion());
+      }
+    } else { 
+      opcionesFormArray.clear();
+    }
+    this.openQuestionMenuIndex = null; 
+  }
+
+  // --- MÉTODOS PARA GESTIONAR PREGUNTAS Y OPCIONES ---
+
   preguntas(): FormArray {
     return this.surveyForm.get('preguntas') as FormArray;
   }
 
-  nuevaPregunta(): FormGroup {
+  nuevaPregunta(tipoPregunta: string): FormGroup {
     return this.fb.group({
       textopregunta: ['', Validators.required],
-      idtipopregunta: ['1', Validators.required],
+      idtipopregunta: [tipoPregunta, Validators.required],
       requerida: [false],
       opciones: this.fb.array([])
     });
   }
 
-  agregarPregunta() {
-    this.preguntas().push(this.nuevaPregunta());
+  agregarPregunta(tipoPregunta: string) {
+    this.preguntas().push(this.nuevaPregunta(tipoPregunta));
+    this.isAddQuestionMenuOpen = false;
   }
 
   quitarPregunta(preguntaIndex: number) {
     this.preguntas().removeAt(preguntaIndex);
+    this.openQuestionMenuIndex = null; 
   }
 
   opciones(preguntaIndex: number): FormArray {
@@ -73,10 +112,12 @@ export class EncuestaAgregarComponent implements OnInit {
     this.opciones(preguntaIndex).removeAt(opcionIndex);
   }
 
+
+
   onSubmit() {
     if (this.surveyForm.invalid) {
       alert('El formulario no es válido. Por favor, revisa que el título y todas las preguntas tengan texto.');
-      this.surveyForm.markAllAsTouched();
+      this.surveyForm.markAllAsTouched(); 
       return;
     }
     
@@ -93,6 +134,7 @@ export class EncuestaAgregarComponent implements OnInit {
   }
 
   goBack() {
-    window.history.back();
+    this.router.navigate(['/dashboard']);
   }
 }
+

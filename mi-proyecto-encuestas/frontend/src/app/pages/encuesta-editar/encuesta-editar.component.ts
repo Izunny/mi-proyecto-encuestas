@@ -1,5 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-
 import { CommonModule } from '@angular/common'; 
 import { ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -8,19 +7,18 @@ import { EncuestasService } from '../../services/encuestas.service';
 @Component({
   selector: 'app-encuesta-editar',
   standalone: true,
-
-  imports: [ 
-    CommonModule, 
-    ReactiveFormsModule 
-  ],
+  imports: [ CommonModule, ReactiveFormsModule ],
   templateUrl: './encuesta-editar.component.html',
   styleUrls: ['./encuesta-editar.component.scss']
 })
 export class EncuestaEditarComponent implements OnInit {
-
   surveyForm!: FormGroup;
   surveyId!: number;
   isLoading = true;
+
+  // --- VARIABLES PARA CONTROLAR LA UI ---
+  public isAddQuestionMenuOpen = false;
+  public openQuestionMenuIndex: number | null = null;
 
   constructor(
     private fb: FormBuilder,
@@ -42,8 +40,8 @@ export class EncuestaEditarComponent implements OnInit {
     if (this.surveyId) {
       this.loadSurveyData();
     } else {
+      alert('No se encontró un ID de encuesta.');
       this.isLoading = false;
-      alert('No se proporcionó un ID de encuesta.');
     }
   }
 
@@ -57,20 +55,22 @@ export class EncuestaEditarComponent implements OnInit {
         });
 
         data.preguntas.forEach((pregunta: any) => {
-          const preguntaFormGroup = this.nuevaPregunta();
-          preguntaFormGroup.patchValue(pregunta);
-          
+          // Usamos la misma función 'nuevaPregunta' para mantener la consistencia
+          const preguntaFormGroup = this.nuevaPregunta(pregunta.idtipopregunta.toString());
+          preguntaFormGroup.patchValue({
+            textopregunta: pregunta.textopregunta,
+            requerida: pregunta.requerida === 'S'
+          });
+
+          const opcionesFormArray = preguntaFormGroup.get('opciones') as FormArray;
           pregunta.opciones.forEach((opcion: any) => {
-            (preguntaFormGroup.get('opciones') as FormArray).push(
-              this.fb.group({
-                opcion: [opcion.opcion, Validators.required]
-              })
-            );
+            opcionesFormArray.push(this.fb.group({
+              opcion: [opcion.opcion, Validators.required]
+            }));
           });
           
           this.preguntas().push(preguntaFormGroup);
         });
-
         this.isLoading = false;
       },
       error: (err) => {
@@ -81,36 +81,81 @@ export class EncuestaEditarComponent implements OnInit {
     });
   }
 
+  // --- MÉTODOS REUTILIZADOS PARA MANEJAR LOS MENÚS ---
+
+  toggleQuestionMenu(index: number): void {
+    this.openQuestionMenuIndex = this.openQuestionMenuIndex === index ? null : index;
+  }
+
+  toggleRequerida(index: number): void {
+    const requeridaControl = this.preguntas().at(index).get('requerida');
+    if (requeridaControl) {
+      requeridaControl.patchValue(!requeridaControl.value);
+    }
+    this.openQuestionMenuIndex = null;
+  }
+
+  cambiarTipoPregunta(preguntaIndex: number, nuevoTipo: string): void {
+    const preguntaFormGroup = this.preguntas().at(preguntaIndex) as FormGroup;
+    const opcionesFormArray = preguntaFormGroup.get('opciones') as FormArray;
+    preguntaFormGroup.get('idtipopregunta')?.setValue(nuevoTipo);
+
+    if (nuevoTipo === '3' || nuevoTipo === '4') {
+      if (opcionesFormArray.length === 0) {
+        opcionesFormArray.push(this.nuevaOpcion());
+      }
+    } else {
+      opcionesFormArray.clear();
+    }
+    this.openQuestionMenuIndex = null;
+  }
+
+  // --- MÉTODOS REUTILIZADOS PARA GESTIONAR PREGUNTAS Y OPCIONES ---
+
   preguntas(): FormArray {
     return this.surveyForm.get('preguntas') as FormArray;
   }
 
-  nuevaPregunta(): FormGroup {
+  nuevaPregunta(tipoPregunta: string): FormGroup {
     return this.fb.group({
       textopregunta: ['', Validators.required],
-      idtipopregunta: ['1', Validators.required],
+      idtipopregunta: [tipoPregunta, Validators.required],
       requerida: [false],
       opciones: this.fb.array([])
     });
   }
-  
-  agregarPregunta() { this.preguntas().push(this.nuevaPregunta()); }
-  quitarPregunta(index: number) { this.preguntas().removeAt(index); }
-  
+
+  agregarPregunta(tipoPregunta: string) {
+    this.preguntas().push(this.nuevaPregunta(tipoPregunta));
+    this.isAddQuestionMenuOpen = false;
+  }
+
+  quitarPregunta(preguntaIndex: number) {
+    this.preguntas().removeAt(preguntaIndex);
+    this.openQuestionMenuIndex = null;
+  }
+
   opciones(preguntaIndex: number): FormArray {
     return this.preguntas().at(preguntaIndex).get('opciones') as FormArray;
   }
-  
+
   nuevaOpcion(): FormGroup {
     return this.fb.group({ opcion: ['', Validators.required] });
   }
 
-  agregarOpcion(preguntaIndex: number) { this.opciones(preguntaIndex).push(this.nuevaOpcion()); }
-  quitarOpcion(preguntaIndex: number, opcionIndex: number) { this.opciones(preguntaIndex).removeAt(opcionIndex); }
+  agregarOpcion(preguntaIndex: number) {
+    this.opciones(preguntaIndex).push(this.nuevaOpcion());
+  }
+
+  quitarOpcion(preguntaIndex: number, opcionIndex: number) {
+    this.opciones(preguntaIndex).removeAt(opcionIndex);
+  }
+
+  // --- NAVEGACIÓN Y ENVÍO DEL FORMULARIO ---
 
   onSubmit() {
     if (this.surveyForm.invalid) {
-      alert('Formulario inválido. Revisa que todos los campos requeridos estén llenos.');
+      alert('Formulario inválido.');
       return;
     }
     this.encuestasService.updateSurvey(this.surveyId, this.surveyForm.value).subscribe({
@@ -119,7 +164,7 @@ export class EncuestaEditarComponent implements OnInit {
         this.router.navigate(['/dashboard']);
       },
       error: (err) => {
-        console.error('Error al actualizar la encuesta:', err);
+        console.error('Error al actualizar:', err);
         alert('Ocurrió un error al actualizar.');
       }
     });

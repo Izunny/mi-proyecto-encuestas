@@ -5,5 +5,6 @@ export interface Encuesta {
   descripcion: string;
   nombreU: string;
   fecha: string; 
+  
   activo: 'S' | 'N';
 }
