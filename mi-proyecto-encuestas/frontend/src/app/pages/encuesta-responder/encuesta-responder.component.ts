@@ -69,6 +69,13 @@ export class EncuestaResponderComponent implements OnInit {
     }
   }
 
+   setRating(preguntaId: string, rating: number): void {
+    const control = (this.responseForm.get('respuestas') as FormGroup).get(preguntaId);
+    if (control) {
+      control.setValue(rating.toString());
+    }
+  }
+
   onSubmit(): void {
     if (this.responseForm.invalid) {
       alert('Por favor, responde todas las preguntas requeridas.');
@@ -90,4 +97,5 @@ export class EncuestaResponderComponent implements OnInit {
       }
     });
   }
+  
 }

@@ -42,6 +42,22 @@
               </div>
             </ng-container>
 
+            <ng-container *ngSwitchCase="5">
+            <div class="slider-container">
+              <input type="range" min="0" max="10" step="1" [formControlName]="pregunta.idpregunta" class="form-slider">
+              <span class="slider-value">{{ responseForm.get('respuestas.' + pregunta.idpregunta)?.value || 0 }}</span>
+            </div>
+          </ng-container>
+
+          <ng-container *ngSwitchCase="6">
+            <div class="star-rating-container">
+              <button type="button" *ngFor="let star of [1, 2, 3, 4, 5]" (click)="setRating(pregunta.idpregunta.toString(), star)">
+                <i class="fa-star" [class.fas]="(responseForm.get('respuestas.' + pregunta.idpregunta)?.value || 0) >= star" [class.far]="(responseForm.get('respuestas.' + pregunta.idpregunta)?.value || 0) < star">
+                </i>
+              </button>
+            </div>
+          </ng-container>
+
           </div>
         </div>
       </div>

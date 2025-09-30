@@ -309,7 +309,7 @@ app.post('/api/responses', async (req, res) => {
     for (const idpregunta of Object.keys(respuestas)) {
       const respuesta = respuestas[idpregunta];
 
-      if (respuesta == null) continue;
+      if (respuesta == null || respuesta === '') continue;
 
       if (Array.isArray(respuesta)) {
         for (const idopcion of respuesta) {

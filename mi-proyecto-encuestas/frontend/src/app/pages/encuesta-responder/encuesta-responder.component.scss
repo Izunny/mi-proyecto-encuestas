@@ -1,0 +1,43 @@
+/* ... (tus estilos existentes) ... */
+
+/* Estilos para el Slider */
+.slider-container {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+
+  .form-slider {
+    flex-grow: 1;
+    cursor: pointer;
+  }
+
+  .slider-value {
+    font-weight: bold;
+    font-size: 1.2rem;
+    color: #3f51b5;
+    min-width: 25px;
+    text-align: center;
+  }
+}
+
+/* Estilos para el Ranking de Estrellas */
+.star-rating-container {
+  display: flex;
+  
+  button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0 4px;
+
+    .fa-star {
+      font-size: 2rem; 
+      color: #ffca28;  
+      transition: transform 0.1s ease-in-out;
+    }
+
+    &:hover .fa-star {
+      transform: scale(1.1);
+    }
+  }
+}
