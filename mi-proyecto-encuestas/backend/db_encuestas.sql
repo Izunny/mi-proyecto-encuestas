@@ -123,13 +123,13 @@ CREATE TABLE `enc_tokens` (
 CREATE TABLE `usuarios` (
   `idusuario` int(11) NOT NULL,
   `username` varchar(50) NOT NULL,
-  `nombreU` varchar(100) NOT NULL,
-  `apellido_paterno` varchar(100) NOT NULL,
+  `nombreU` varchar(100) DEFAULT NULL,
+  `apellido_paterno` varchar(100) DEFAULT NULL,
   `apellido_materno` varchar(100) DEFAULT NULL,
-  `fecha_nacimiento` date NOT NULL,
+  `fecha_nacimiento` date DEFAULT NULL,
   `email` varchar(255) NOT NULL,
   `telefono` varchar(15) DEFAULT NULL,
-  `genero` enum('Masculino','Femenino','Otro') NOT NULL,
+  `genero` enum('Masculino','Femenino','Otro') DEFAULT NULL,
   `password_hash` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
