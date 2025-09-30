@@ -16,7 +16,36 @@ const db = mysql.createPool({
 });
 
 
+// Registro de usuario (tu endpoint extendido)
+app.post('/api/usuarios', (req, res) => {
+  
+  const { username, nombre, email, password } = req.body;
 
+  if (!username) {
+    return res.status(400).json({ error: 'Faltan campos obligatorios.' });
+  }
+
+  const sqlQuery = `
+    INSERT INTO usuarios 
+    (username, nombreU, email, password_hash) 
+    VALUES (?, ?, ?, ?);
+  `;
+
+  db.query(sqlQuery, [username, nombre, email, password], (err, results) => {
+    if (err) {
+      console.error('Error al registrar el usuario:', err);
+      if (err.code === 'ER_DUP_ENTRY') {
+        return res.status(409).json({ error: 'El email o el nombre de usuario ya existen.' });
+      }
+      return res.status(500).json({ error: 'Error interno del servidor al registrar el usuario.' });
+    }
+    // Solo se puede usar res.json, res.send, res.redirect, res.render una vez por request
+    //res.status(201).json({ message: '¡Usuario registrado con éxito!', userId: results.insertId });
+    res.json(results);
+  });
+});
+
+/*
 // CREATE
 app.post('/usuarios', (req, res) => {
   const { nombre, email } = req.body;
@@ -25,6 +54,7 @@ app.post('/usuarios', (req, res) => {
     res.json(result);
   });
 });
+*/
 
 // READ
 app.get('/usuarios', (req, res) => {
@@ -53,30 +83,10 @@ app.delete('/usuarios/:id', (req, res) => {
   });
 });
 
-// Registro de usuario (tu endpoint extendido)
-app.post('/api/register', (req, res) => {
-  const { username, nombreU, apellido_paterno, apellido_materno, fecha_nacimiento, email, telefono, genero, password_hash } = req.body;
-
-  if (!username || !nombreU || !apellido_paterno || !fecha_nacimiento || !email || !genero || !password_hash) {
-    return res.status(400).json({ error: 'Faltan campos obligatorios.' });
-  }
-
-  const sqlQuery = `
-    INSERT INTO usuarios 
-    (username, nombreU, apellido_paterno, apellido_materno, fecha_nacimiento, email, telefono, genero, password_hash) 
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `;
-
-  db.query(sqlQuery, [username, nombreU, apellido_paterno, apellido_materno, fecha_nacimiento, email, telefono, genero, password_hash], (err, results) => {
-    if (err) {
-      console.error('Error al registrar el usuario:', err);
-      if (err.code === 'ER_DUP_ENTRY') {
-        return res.status(409).json({ error: 'El email o el nombre de usuario ya existen.' });
-      }
-      return res.status(500).json({ error: 'Error interno del servidor al registrar el usuario.' });
-    }
-    res.status(201).json({ message: '¡Usuario registrado con éxito!', userId: results.insertId });
-  });
+//Servidor corriendo en un solo puerto
+const PORT = 3000;
+app.listen(PORT, () => {
+  console.log(`🚀 Servidor backend corriendo en http://localhost:${PORT}`);
 });
 
 // OBTENER TODAS LAS ENCUESTAS (CON EL NOMBRE DEL USUARIO)
@@ -120,12 +130,6 @@ app.get('/api/surveys/user/:userId', (req, res) => {
   });
 });
 
-
-//Servidor corriendo en un solo puerto
-const PORT = 3000;
-app.listen(PORT, () => {
-  console.log(`🚀 Servidor backend corriendo en http://localhost:${PORT}`);
-});
 
 app.put('/api/surveys/:surveyId/status', (req, res) => {
   const { surveyId } = req.params;

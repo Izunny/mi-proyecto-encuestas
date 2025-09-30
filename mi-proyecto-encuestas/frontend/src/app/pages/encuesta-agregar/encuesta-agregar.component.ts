@@ -17,7 +17,7 @@ import { EncuestasService } from '../../services/encuestas.service';
 export class EncuestaAgregarComponent implements OnInit {
   surveyForm!: FormGroup;
   
-  
+
   public isAddQuestionMenuOpen = false; 
   public openQuestionMenuIndex: number | null = null; 
 
