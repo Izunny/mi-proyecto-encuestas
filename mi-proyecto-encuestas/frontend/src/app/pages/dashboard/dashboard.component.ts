@@ -78,18 +78,32 @@ export class DashboardComponent implements OnInit {
   }
 
   deleteSelectedSurvey(): void {
-    if (!this.selectedSurveyId) return;
-    if (confirm('¿Estás seguro de que quieres eliminar esta encuesta?')) {
+    if (!this.selectedSurveyId) {
+      alert('Por favor, selecciona una encuesta para eliminar.');
+      return;
+    }
+    const surveyToDelete = this.surveys.find(s => s.idencuesta === this.selectedSurveyId);
+
+    if (!surveyToDelete) return; 
+
+    let confirmationMessage = '¿Estás seguro de que quieres eliminar esta encuesta?';
+
+    if (surveyToDelete.responseCount > 0) {
+      confirmationMessage = `¡ATENCIÓN! Esta encuesta ya tiene ${surveyToDelete.responseCount} respuesta(s). Si la eliminas, se borrarán permanentemente todos los resultados.\n\n¿Estás seguro de que quieres continuar?`;
+    }
+
+    if (confirm(confirmationMessage)) {
       this.encuestasService.deleteSurvey(this.selectedSurveyId).subscribe({
         next: () => {
           alert('Encuesta eliminada con éxito.');
           this.viewMode === 'user' ? this.loadUserSurveys() : this.loadAllSurveys();
           this.selectedSurveyId = null;
         },
-        error: (err: any) => alert('Error al eliminar la encuesta: ' + err.message)
+        error: (err: any) => {
+          console.error('Error al eliminar la encuesta:', err);
+          alert('Error al eliminar la encuesta: ' + (err.error?.message || err.message));
+        }
       });
     }
   }
-
- 
-}
+} 

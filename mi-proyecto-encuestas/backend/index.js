@@ -109,21 +109,20 @@ app.get('/api/surveys', (req, res) => {
 });
 
 // OBTENER LAS ENCUESTAS DE UN USUARIO ESPECIFICO
-app.get('/api/surveys/user/:userId', (req, res) => {
-  const { userId } = req.params;
-
+app.get('/api/surveys', (req, res) => {
+  // Añadimos una subconsulta para contar las respuestas de cada encuesta
   const sqlQuery = `
     SELECT 
       e.*, 
-      u.nombreU 
-    FROM enc_encuestasm e  -- <-- CORREGIDO
-    JOIN usuarios u ON e.idusuario = u.idusuario
-    WHERE e.idusuario = ?;
+      u.nombreU,
+      (SELECT COUNT(*) FROM enc_respuesta er WHERE er.idencuesta = e.idencuesta) as responseCount
+    FROM enc_encuestasm e
+    JOIN usuarios u ON e.idusuario = u.idusuario;
   `;
 
-  db.query(sqlQuery, [userId], (err, results) => {
+  db.query(sqlQuery, (err, results) => {
     if (err) {
-    console.error(`Error al obtener encuestas para el usuario ${userId}:`, err);
+      console.error('Error al obtener todas las encuestas:', err);
       return res.status(500).json({ error: 'Error interno del servidor.' });
     }
     res.json(results);
@@ -195,7 +194,7 @@ app.post('/api/surveys', async (req, res) => {
 
   } catch (err) {
     await connection.rollback();
-    console.error('Error al crear la encuesta:', err); // Este es el error que necesitas revisar
+    console.error('Error al crear la encuesta:', err); 
     res.status(500).json({ error: 'Error interno del servidor al crear la encuesta.' });
 
   } finally {
@@ -308,7 +307,7 @@ app.post('/api/responses', async (req, res) => {
 
     const responseQuery = 'INSERT INTO enc_respuesta (idencuesta, idusuario, fecha) VALUES (?, ?, NOW())';
     const [responseResult] = await connection.query(responseQuery, [idencuesta, idusuario]);
-    const newResponseId = responseResult.insertId; 
+    const newResponseId = responseResult.insertId;
 
     for (const idpregunta of Object.keys(respuestas)) {
       const respuesta = respuestas[idpregunta];
@@ -316,6 +315,7 @@ app.post('/api/responses', async (req, res) => {
       if (respuesta == null || respuesta === '') continue;
 
       if (Array.isArray(respuesta)) {
+        // OPCION MULTIPLE (es un array de numeros)
         for (const idopcion of respuesta) {
           await connection.query(
             'INSERT INTO enc_respuestaopcion (idopciones, idrespuestas, idpregunta) VALUES (?, ?, ?)',
@@ -323,14 +323,16 @@ app.post('/api/responses', async (req, res) => {
           );
         }
       } else if (typeof respuesta === 'number') {
+        // OPCION UNICA 
         await connection.query(
           'INSERT INTO enc_respuestaopcion (idopciones, idrespuestas, idpregunta) VALUES (?, ?, ?)',
           [respuesta, newResponseId, idpregunta]
         );
-      } else if (typeof respuesta === 'string' && respuesta.trim() !== '') {
+      } else {
+        // TEXTO, SLIDER O RANKING
         await connection.query(
           'INSERT INTO enc_respuestatexto (respuesta, idrespuestas, idpregunta) VALUES (?, ?, ?)',
-          [respuesta.trim(), newResponseId, idpregunta]
+          [respuesta.toString(), newResponseId, idpregunta]
         );
       }
     }
@@ -342,6 +344,29 @@ app.post('/api/responses', async (req, res) => {
     await connection.rollback();
     console.error('Error al guardar las respuestas:', err);
     res.status(500).json({ error: 'Error interno del servidor al guardar las respuestas.' });
+  } finally {
+    connection.release();
+  }
+});
+
+// ELIMINAR UNA ENCUESTA POR SU ID
+app.delete('/api/surveys/:id', async (req, res) => {
+  const { id } = req.params;
+  const connection = await db.promise().getConnection();
+
+  try {
+    const query = 'DELETE FROM enc_encuestasm WHERE idencuesta = ?';
+    const [result] = await connection.query(query, [id]);
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'No se encontró la encuesta con ese ID.' });
+    }
+
+    res.json({ message: 'Encuesta eliminada con éxito.' });
+
+  } catch (err) {
+    console.error(`Error al eliminar la encuesta ${id}:`, err);
+    res.status(500).json({ error: 'Error interno del servidor.' });
   } finally {
     connection.release();
   }

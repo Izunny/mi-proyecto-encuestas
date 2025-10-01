@@ -143,9 +143,11 @@
 
 /* posicionamiento específico para el menu principal "Agregar Pregunta" */
 .form-actions .dropdown-menu {
-  bottom: 100%;
-  left: 0;
-  margin-bottom: 10px;
+   right: 0;
+  top: 100%;
+  margin-top: 8px;
+  width: 180px;
+
 }
 
 /* posicionamiento específico para el menu del engranaje */

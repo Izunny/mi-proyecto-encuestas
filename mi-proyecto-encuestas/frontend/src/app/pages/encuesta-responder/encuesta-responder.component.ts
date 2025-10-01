@@ -76,22 +76,44 @@ export class EncuestaResponderComponent implements OnInit {
     }
   }
 
-  onSubmit(): void {
+    onSubmit(): void {
     if (this.responseForm.invalid) {
       alert('Por favor, responde todas las preguntas requeridas.');
       return;
     }
+
+    const rawRespuestas = this.responseForm.value.respuestas;
+    const processedRespuestas: { [key: string]: any } = {};
+
+    for (const preguntaId of Object.keys(rawRespuestas)) {
+      const pregunta = this.survey.preguntas.find((p: any) => p.idpregunta.toString() === preguntaId);
+      if (!pregunta) continue;
+
+      const respuesta = rawRespuestas[preguntaId];
+
+      if (pregunta.idtipopregunta === 3 && respuesta) {
+        processedRespuestas[preguntaId] = Number(respuesta);
+      } 
+      else if ((pregunta.idtipopregunta === 5 || pregunta.idtipopregunta === 6) && respuesta) {
+        processedRespuestas[preguntaId] = respuesta.toString();
+      }
+      else { 
+        processedRespuestas[preguntaId] = respuesta;
+      }
+    }
+
     const submissionData = {
       idencuesta: this.surveyId,
-      idusuario: 1, 
-      respuestas: this.responseForm.value.respuestas
+      idusuario: 1,
+      respuestas: processedRespuestas 
     };
+
     this.encuestasService.submitResponses(submissionData).subscribe({
       next: () => {
         alert('¡Gracias por completar la encuesta!');
         this.router.navigate(['/dashboard']);
       },
-      error: (err) => {
+      error: (err: any) => {
         console.error('Error al enviar las respuestas:', err);
         alert('Ocurrió un error al enviar tus respuestas.');
       }

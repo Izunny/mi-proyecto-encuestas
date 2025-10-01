@@ -7,4 +7,6 @@ export interface Encuesta {
   fecha: string; 
   
   activo: 'S' | 'N';
+
+  responseCount: number;
 }
