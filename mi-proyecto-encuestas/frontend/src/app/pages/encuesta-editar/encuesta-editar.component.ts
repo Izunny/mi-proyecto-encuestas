@@ -16,9 +16,17 @@ export class EncuestaEditarComponent implements OnInit {
   surveyId!: number;
   isLoading = true;
 
-  // --- VARIABLES PARA CONTROLAR LA UI ---
+ 
   public isAddQuestionMenuOpen = false;
   public openQuestionMenuIndex: number | null = null;
+  private questionTypeIcons: { [key: string]: string } = {
+    '1': 'fas fa-font',           // Texto Corto
+    '2': 'fas fa-paragraph',      // Párrafo
+    '3': 'fas fa-dot-circle',     // Opción Única
+    '4': 'fas fa-check-square',   // Opción Múltiple
+    '5': 'fas fa-sliders-h',      // Slider
+    '6': 'fas fa-star'            // Ranking
+  };
 
   constructor(
     private fb: FormBuilder,
@@ -43,6 +51,10 @@ export class EncuestaEditarComponent implements OnInit {
       alert('No se encontró un ID de encuesta.');
       this.isLoading = false;
     }
+  }
+
+    public getIconForQuestionType(typeId: string): string {
+    return this.questionTypeIcons[typeId] || 'fas fa-list-ul';
   }
 
   loadSurveyData(): void {

@@ -1,5 +1,18 @@
 
 <div class="responder-container">
+
+    <main class="main-content"> 
+
+    <header class="content-header">
+      <a href="#"><img class="img-logo" src="/assets/images/logo.png"></a>
+      <h1 class="app-title">Encuestas Dinamicas</h1>
+      <div class="header-actions">
+      </div>
+  
+  </header>
+
+
+
   <div *ngIf="isLoading" class="loading">Cargando encuesta...</div>
 
   <div *ngIf="!isLoading && survey" class="survey-form">
@@ -66,4 +79,5 @@
       <button type="submit" class="submit-btn">Enviar Respuestas</button>
     </form>
   </div>
+  </main>
 </div>

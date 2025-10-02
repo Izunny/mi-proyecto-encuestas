@@ -20,6 +20,14 @@ export class EncuestaAgregarComponent implements OnInit {
 
   public isAddQuestionMenuOpen = false; 
   public openQuestionMenuIndex: number | null = null; 
+  private questionTypeIcons: { [key: string]: string } = {
+    '1': 'fas fa-font',           // Texto Corto
+    '2': 'fas fa-paragraph',      // Párrafo
+    '3': 'fas fa-dot-circle',     // Opción Única
+    '4': 'fas fa-check-square',   // Opción Múltiple
+    '5': 'fas fa-sliders-h',      // Slider
+    '6': 'fas fa-star'            // Ranking
+  };
 
   constructor(
     private fb: FormBuilder,
@@ -36,6 +44,10 @@ export class EncuestaAgregarComponent implements OnInit {
       idusuario: [1], 
       preguntas: this.fb.array([])
     });
+  }
+
+  public getIconForQuestionType(typeId: string): string {
+    return this.questionTypeIcons[typeId] || 'fas fa-list-ul';
   }
 
   // --- METODOS PARA MANEJAR LOS MENUS DE CADA PREGUNTA ---

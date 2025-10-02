@@ -10,10 +10,10 @@
       </div>
     
 
-  <div class="d-flex justify-content-between align-items-center">
-    <h3>Hola, <b>Usuario</b>.</h3>
-  </div>
-  </header>
+      <div class="d-flex justify-content-between align-items-center">
+        <h3>Hola, <b>Usuario</b>.</h3>
+      </div>
+    </header>
 
 
   <div class="mb-3">
@@ -57,38 +57,38 @@
       </div>
 
 
-<div class="card-body"> 
-  <table class="table table-hover">
-    <thead>
-      <tr>
-        <th></th> 
-        <th>Título</th>
-        <th>Descripción</th>
-        <th>Usuario</th>
-        <th>Fecha</th>
-        <th>Estado</th> 
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let survey of filteredSurveys">
-        <td>
-          <input type="radio" name="seleccionEncuesta" [value]="survey.idencuesta" (click)="selectSurvey(survey.idencuesta)">
-        </td>
-        <td>{{ survey.nombre }}</td>
-        <td>{{ survey.descripcion }}</td>
-        <td>{{ survey.nombreU }}</td>
-        <td>{{ survey.fecha | date: 'dd/MM/yyyy' }}</td>
-        <td>
-          <button class="btn btn-sm" 
-                  [ngClass]="survey.activo === 'S' ? 'btn-success' : 'btn-danger'"
-                  (click)="changeStatus(survey)">
-            {{ survey.activo === 'S' ? 'Activo' : 'Inactivo' }}
-          </button>
-        </td>
-      </tr>
-    </tbody>
-  </table>
-</div>
+    <div class="card-body"> 
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <th></th> 
+            <th>Título</th>
+            <th>Descripción</th>
+            <th>Usuario</th>
+            <th>Fecha</th>
+            <th>Estado</th> 
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let survey of filteredSurveys">
+            <td>
+              <input type="radio" name="seleccionEncuesta" [value]="survey.idencuesta" (click)="selectSurvey(survey.idencuesta)">
+            </td>
+            <td>{{ survey.nombre }}</td>
+            <td>{{ survey.descripcion }}</td>
+            <td>{{ survey.nombreU }}</td>
+            <td>{{ survey.fecha | date: 'dd/MM/yyyy' }}</td>
+            <td>
+              <button class="btn btn-sm" 
+                      [ngClass]="survey.activo === 'S' ? 'btn-success' : 'btn-danger'"
+                      (click)="changeStatus(survey)">
+                {{ survey.activo === 'S' ? 'Activo' : 'Inactivo' }}
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
   </div>
   </main>

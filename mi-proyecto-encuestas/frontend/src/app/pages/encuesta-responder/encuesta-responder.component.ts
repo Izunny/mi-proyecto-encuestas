@@ -119,5 +119,9 @@ export class EncuestaResponderComponent implements OnInit {
       }
     });
   }
+
+    goBack(): void {
+    this.router.navigate(['/dashboard']);
+  }
   
 }
