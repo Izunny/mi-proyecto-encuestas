@@ -1,7 +1,7 @@
 
 <div class="responder-container">
 
-    <main class="main-content"> 
+    <main class="main-content1"> 
 
     <header class="content-header">
       <a href="#"><img class="img-logo" src="/assets/images/logo.png"></a>
@@ -9,75 +9,75 @@
       <div class="header-actions">
       </div>
   
-  </header>
-
-
-
-  <div *ngIf="isLoading" class="loading">Cargando encuesta...</div>
-
-  <div *ngIf="!isLoading && survey" class="survey-form">
-    <header class="survey-header">
-      <h1>{{ survey.nombre }}</h1>
-      <p>{{ survey.descripcion }}</p>
     </header>
+    </main>
 
-    <form [formGroup]="responseForm" (ngSubmit)="onSubmit()">
-      <div formGroupName="respuestas">
-        <div *ngFor="let pregunta of survey.preguntas; let i = index" class="question-block">
-          <label class="question-label">
-            {{ i + 1 }}. {{ pregunta.textopregunta }}
-            <span *ngIf="pregunta.requerida === 'S'" class="required-asterisk">*</span>
-          </label>
-          
-          <div [ngSwitch]="pregunta.idtipopregunta">
+  <main class="main-content"> 
+    <div *ngIf="isLoading" class="loading">Cargando encuesta...</div>
+
+    <div *ngIf="!isLoading && survey" class="survey-form">
+      <header class="survey-header">
+        <h1>{{ survey.nombre }}</h1>
+        <p>{{ survey.descripcion }}</p>
+      </header>
+
+      <form [formGroup]="responseForm" (ngSubmit)="onSubmit()">
+        <div formGroupName="respuestas">
+          <div *ngFor="let pregunta of survey.preguntas; let i = index" class="question-block">
+            <label class="question-label">
+              {{ i + 1 }}. {{ pregunta.textopregunta }}
+              <span *ngIf="pregunta.requerida === 'S'" class="required-asterisk">*</span>
+            </label>
             
-            <ng-container *ngSwitchCase="1">
-              <input type="text" [formControlName]="pregunta.idpregunta" class="form-input">
-            </ng-container>
-            <ng-container *ngSwitchCase="2">
-              <textarea [formControlName]="pregunta.idpregunta" class="form-textarea"></textarea>
-            </ng-container>
+            <div [ngSwitch]="pregunta.idtipopregunta">
+              
+              <ng-container *ngSwitchCase="1">
+                <input type="text" [formControlName]="pregunta.idpregunta" class="form-input">
+              </ng-container>
+              <ng-container *ngSwitchCase="2">
+                <textarea [formControlName]="pregunta.idpregunta" class="form-textarea"></textarea>
+              </ng-container>
 
-            <ng-container *ngSwitchCase="3">
-              <div class="options-group">
-                <div *ngFor="let opcion of pregunta.opciones" class="option-item">
-                  <input type="radio" [name]="pregunta.idpregunta" [value]="opcion.idopciones" [formControlName]="pregunta.idpregunta">
-                  <label>{{ opcion.opcion }}</label>
+              <ng-container *ngSwitchCase="3">
+                <div class="options-group">
+                  <div *ngFor="let opcion of pregunta.opciones" class="option-item">
+                    <input type="radio" [name]="pregunta.idpregunta" [value]="opcion.idopciones" [formControlName]="pregunta.idpregunta">
+                    <label>{{ opcion.opcion }}</label>
+                  </div>
                 </div>
+              </ng-container>
+
+              <ng-container *ngSwitchCase="4">
+                <div class="options-group">
+                  <div *ngFor="let opcion of pregunta.opciones" class="option-item">
+                    <input type="checkbox" [value]="opcion.idopciones" (change)="onCheckboxChange($event, pregunta.idpregunta.toString())">
+                    <label>{{ opcion.opcion }}</label>
+                  </div>
+                </div>
+              </ng-container>
+
+              <ng-container *ngSwitchCase="5">
+              <div class="slider-container">
+                <input type="range" min="0" max="10" step="1" [formControlName]="pregunta.idpregunta" class="form-slider">
+                <span class="slider-value">{{ responseForm.get('respuestas.' + pregunta.idpregunta)?.value || 0 }}</span>
               </div>
             </ng-container>
 
-            <ng-container *ngSwitchCase="4">
-              <div class="options-group">
-                <div *ngFor="let opcion of pregunta.opciones" class="option-item">
-                  <input type="checkbox" [value]="opcion.idopciones" (change)="onCheckboxChange($event, pregunta.idpregunta.toString())">
-                  <label>{{ opcion.opcion }}</label>
-                </div>
+            <ng-container *ngSwitchCase="6">
+              <div class="star-rating-container">
+                <button type="button" *ngFor="let star of [1, 2, 3, 4, 5]" (click)="setRating(pregunta.idpregunta.toString(), star)">
+                  <i class="fa-star" [class.fas]="(responseForm.get('respuestas.' + pregunta.idpregunta)?.value || 0) >= star" [class.far]="(responseForm.get('respuestas.' + pregunta.idpregunta)?.value || 0) < star">
+                  </i>
+                </button>
               </div>
             </ng-container>
 
-            <ng-container *ngSwitchCase="5">
-            <div class="slider-container">
-              <input type="range" min="0" max="10" step="1" [formControlName]="pregunta.idpregunta" class="form-slider">
-              <span class="slider-value">{{ responseForm.get('respuestas.' + pregunta.idpregunta)?.value || 0 }}</span>
             </div>
-          </ng-container>
-
-          <ng-container *ngSwitchCase="6">
-            <div class="star-rating-container">
-              <button type="button" *ngFor="let star of [1, 2, 3, 4, 5]" (click)="setRating(pregunta.idpregunta.toString(), star)">
-                <i class="fa-star" [class.fas]="(responseForm.get('respuestas.' + pregunta.idpregunta)?.value || 0) >= star" [class.far]="(responseForm.get('respuestas.' + pregunta.idpregunta)?.value || 0) < star">
-                </i>
-              </button>
-            </div>
-          </ng-container>
-
           </div>
         </div>
-      </div>
 
-      <button type="submit" class="submit-btn">Enviar Respuestas</button>
-    </form>
-  </div>
+        <button type="submit" class="submit-btn">Enviar Respuestas</button>
+      </form>
+    </div>
   </main>
 </div>
