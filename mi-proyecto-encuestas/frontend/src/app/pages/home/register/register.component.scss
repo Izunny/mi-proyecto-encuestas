@@ -1,5 +1,14 @@
 /* src/app/landing/landing.component.scss */
 
+/* Formas en el background */
+#oval {
+  width: 200px;
+  height: 100px;
+  background: red;
+  border-radius: 100px / 50px;
+}
+
+
 .landing-container {
   display: flex;
   flex-direction: column;
@@ -47,6 +56,11 @@
 
 /* --- Seccion Formulario --- */
 
+label {
+  font-weight: bold;
+  margin-top: 16px; 
+}
+
 .center-section{
   display: flex;
   padding: 20px 50px 20px 50px;
@@ -74,16 +88,17 @@ form {
 label {display: block;}
 
 input{
-  background-color: transparent;
+  background-color: #222630;
   
   color: white;
   width: 100%;
-  padding: 10px 10px 10px 35px;
+  padding: 15px 15px 15px 15px;
+  font-size: 16px;;
   margin: 10px 0px 15px 0px;
   display: inline-block;
-  border: solid #ffffff;
-  border-width: 0px 0px 2px 0px;
   box-sizing: border-box;
+  border-radius: 10px;
+  border: 3px solid var(--border-color);
 
   background-repeat: no-repeat;
   background-size: 5% 50%;
@@ -91,17 +106,7 @@ input{
 
 }
 
-#name{
-  background-image: url('/assets/images/search.png');
-}
 
-#email{
-  background-image: url('/assets/images/mensaje.png');
-}
-
-#password{
-  background-image: url('/assets/images/contraseña.png');
-}
 
 
 input:focus {
@@ -180,6 +185,7 @@ button:active {
     }
   }
 }
+
 
 
 

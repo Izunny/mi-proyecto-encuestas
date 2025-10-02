@@ -1,6 +1,10 @@
+
 const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
+const bcrypt = require('bcrypt');
+const crypto = require('crypto');
+
 
 const app = express();
 app.use(cors());
@@ -15,23 +19,29 @@ const db = mysql.createPool({
   database: 'db_encuestas'
 });
 
+//Servidor corriendo en un solo puerto
+const PORT = 3000;
 
 // Registro de usuario (tu endpoint extendido)
 app.post('/api/usuarios', (req, res) => {
   
-  const { username, nombre, email, password } = req.body;
+  const { username, password } = req.body;
 
-  if (!username) {
+  if (!username || !password) {
     return res.status(400).json({ error: 'Faltan campos obligatorios.' });
   }
 
+  const id = crypto.randomUUID();
+  const hashedPassword = bcrypt.hashSync(password, 10); // Hasheamos la contraseña
+
+
   const sqlQuery = `
     INSERT INTO usuarios 
-    (username, nombreU, email, password_hash) 
-    VALUES (?, ?, ?, ?);
+    (username, password_hash) 
+    VALUES (?, ?);
   `;
 
-  db.query(sqlQuery, [username, nombre, email, password], (err, results) => {
+  db.query(sqlQuery, [username, hashedPassword], (err, results) => {
     if (err) {
       console.error('Error al registrar el usuario:', err);
       if (err.code === 'ER_DUP_ENTRY') {
@@ -45,16 +55,7 @@ app.post('/api/usuarios', (req, res) => {
   });
 });
 
-/*
-// CREATE
-app.post('/usuarios', (req, res) => {
-  const { nombre, email } = req.body;
-  db.query('INSERT INTO usuarios (nombre, email) VALUES (?, ?)', [nombre, email], (err, result) => {
-    if (err) return res.json(err);
-    res.json(result);
-  });
-});
-*/
+
 
 // READ
 app.get('/usuarios', (req, res) => {
@@ -83,8 +84,7 @@ app.delete('/usuarios/:id', (req, res) => {
   });
 });
 
-//Servidor corriendo en un solo puerto
-const PORT = 3000;
+
 app.listen(PORT, () => {
   console.log(`🚀 Servidor backend corriendo en http://localhost:${PORT}`);
 });
