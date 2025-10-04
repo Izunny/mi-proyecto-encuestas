@@ -10,25 +10,25 @@
         <a href="/login">Iniciar sesión</a>
         <a href="/registro" class="btn btn-primary">Regístrate</a>
     </nav>
-</header>
+</header>       
 
 <div class="landing-container">
     <div class="center-section">
-        <form class="form-register">
+        <form  [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="formulario">
         <div>
             <h1>Inicio de sesión</h1>
             <p>¿No tienes una cuenta?<br>Puedes <a href="/registro" style="color: #C10C99; text-decoration: none;">registrarte aqui!</a></p>
 
             <label for="username">Nombre de usuario</label>
-            <input type="username" id="username" name="username" placeholder="Ingresa tu nombre de usuario" required formControlName="username"/>
+            <input formControlName="username" type="username" id="username" name="username" placeholder="Ingresa tu nombre de usuario" required formControlName="username"/>
 
             <!--
             <label for="email">Correo electronico</label>
             <input type="email" id="email" name="email" placeholder="Ingresa tu correo electronico" required formControlName="email"/>
             -->
             <label for="password">Contraseña</label>
-            <input type="password" id="password" name="password" placeholder="Ingresa tu contraseña" required formControlName="password"/>
-            <button>Registro</button>
+            <input formControlName="password" type="password" id="password" name="password" placeholder="Ingresa tu contraseña" required formControlName="password"/>
+            <button>Iniciar sesión</button>
         </div>
         <img src="/assets/images/grupo.jpg" id="image-register">
         </form>

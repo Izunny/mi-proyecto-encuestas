@@ -6,13 +6,11 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 
-export class RegisterService {
-  
+
+export class LoginService {
   constructor(private http: HttpClient) { }
 
-  registerUser(registerUser: any): Observable<any> {
-    return this.http.post(`http://localhost:3000/register`, registerUser);
+  loginUser(loginUser: any): Observable<any> {
+    return this.http.post(`http://localhost:3000/login`, loginUser);
   }
-
 }
-

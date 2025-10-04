@@ -1,16 +1,12 @@
-
 const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
 const bcrypt = require('bcrypt');
 const crypto = require('crypto');
 
-
 const app = express();
 app.use(cors());
 app.use(express.json());
-
-//Conexión única a la BD
 
 const db = mysql.createPool({
   host: 'localhost',
@@ -22,25 +18,26 @@ const db = mysql.createPool({
 //Servidor corriendo en un solo puerto
 const PORT = 3000;
 
+//Conexión única a la BD
+app.listen(PORT, () => {
+  console.log(`🚀 Servidor backend corriendo en http://localhost:${PORT}`);
+});
+
+
 // Registro de usuario (tu endpoint extendido)
-app.post('/api/usuarios', (req, res) => {
+app.post('/register', (req, res) => {
   
   const { username, password } = req.body;
-
+  
+  // Validar que los campos obligatorios estén presentes
   if (!username || !password) {
-    return res.status(400).json({ error: 'Faltan campos obligatorios.' });
+    return res.send(400).json({ error: 'Faltan campos obligatorios.' });
   }
 
-  const id = crypto.randomUUID();
-  const hashedPassword = bcrypt.hashSync(password, 10); // Hasheamos la contraseña
+  // Hashear la contraseña antes de guardarla
+  const hashedPassword = bcrypt.hashSync(password, 10);
 
-
-  const sqlQuery = `
-    INSERT INTO usuarios 
-    (username, password_hash) 
-    VALUES (?, ?);
-  `;
-
+  const sqlQuery = `INSERT INTO usuarios (username, password_hash) VALUES (?, ?);`;
   db.query(sqlQuery, [username, hashedPassword], (err, results) => {
     if (err) {
       console.error('Error al registrar el usuario:', err);
@@ -50,12 +47,40 @@ app.post('/api/usuarios', (req, res) => {
       return res.status(500).json({ error: 'Error interno del servidor al registrar el usuario.' });
     }
     // Solo se puede usar res.json, res.send, res.redirect, res.render una vez por request
-    //res.status(201).json({ message: '¡Usuario registrado con éxito!', userId: results.insertId });
-    res.json(results);
+    res.status(201).json({ message: '¡Usuario registrado con éxito!', userId: results.insertId });
   });
 });
 
+app.post('/login', (req, res) => {
+  const { username, password } = req.body;
+  if (!username || !password) {
+    return res.status(400).json({ error: 'Faltan campos obligatorios.' });
+  }
 
+  // Hashear la contraseña antes de guardarla
+  const hashedPassword = bcrypt.hashSync(password, 10);
+
+  const sqlQuery = `SELECT * FROM usuarios WHERE username = ?;`;
+  db.query(sqlQuery, [username, hashedPassword], (err, results) => {
+    // Manejo de errores y validación de usuario
+
+    if (results.length === 0) {
+      return res.status(401).json({ error: 'Nombre de usuario incorrecto.' });
+    }
+
+    const match = bcrypt.compareSync(password, results[0].password_hash);
+    if (!match) {
+      return res.status(401).json({ error: 'Contraseña incorrecta.' });
+    }
+    
+    if (err) {
+      console.error('Error al iniciar sesión:', err);
+      return res.status(500).json({ error: 'Error interno del servidor al iniciar sesión.' });
+    }
+
+    res.status(200).json({ message: '¡Inicio de sesión con éxito!', usuario: results[0].username, userId: results[0].idusuario });
+});
+});
 
 // READ
 app.get('/usuarios', (req, res) => {
@@ -85,9 +110,7 @@ app.delete('/usuarios/:id', (req, res) => {
 });
 
 
-app.listen(PORT, () => {
-  console.log(`🚀 Servidor backend corriendo en http://localhost:${PORT}`);
-});
+
 
 // OBTENER TODAS LAS ENCUESTAS (CON EL NOMBRE DEL USUARIO)
 app.get('/api/surveys', (req, res) => {

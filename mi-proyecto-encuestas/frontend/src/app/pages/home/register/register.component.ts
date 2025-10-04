@@ -31,12 +31,12 @@ export class RegisterComponent implements OnInit{
     });
   }
 
-    onSubmit() {
-    if (this.registerForm.invalid) {
-      alert('Algunos de los datos son incorrectos.');
-      this.registerForm.markAllAsTouched(); 
-      return;
-    }
+  onSubmit() {
+  if (this.registerForm.invalid) {
+    alert('Algunos de los datos son incorrectos.');
+    this.registerForm.markAllAsTouched(); 
+    return;
+  }
     
     this.registerService.registerUser(this.registerForm.value).subscribe({
       next: (response) => {

@@ -1,18 +1,57 @@
-import { Component } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Router } from '@angular/router';
+import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common'; 
+import { ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
+import { Router } from '@angular/router'; 
+import { LoginService } from '../../../services/login.service'; 
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [],
+  imports: [    
+    CommonModule,
+    ReactiveFormsModule 
+  ],
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss']
 })
-export class LoginComponent {
+
+export class LoginComponent implements OnInit{
+  loginForm!: FormGroup;
+
+  constructor(
+    private fb: FormBuilder,
+    private LoginService: LoginService,
+    private router: Router
+  ) { }
+
+  ngOnInit(): void {
+    this.loginForm = this.fb.group({
+      username: ['', Validators.required], 
+      password: ['', Validators.required],
+    });
+  }
+
+  onSubmit() {
+    if (this.loginForm.invalid) {
+      alert('Algunos de los datos son incorrectos.');
+      this.loginForm.markAllAsTouched(); 
+      return;
+    }
+      this.LoginService.loginUser(this.loginForm.value).subscribe({
+        next: (response) => {
+          alert('!Inicio de sesión exitoso!');
+          this.router.navigate(['/dashboard']); 
+        },
+        error: (err) => {
+          console.error('Error en tu inicio de sesión:', err);
+          alert('Ocurrió un error. Revisa la consola para más detalles.');
+        }
+    });
+  }
+
 
 }
-/*
+  /*
   export class LoginComponent {
     username = '';
     password = '';
