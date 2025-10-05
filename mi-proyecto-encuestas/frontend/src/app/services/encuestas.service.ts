@@ -10,6 +10,10 @@ export class EncuestasService {
 
   constructor(private http: HttpClient) { }
 
+  logout(logout: any): Observable<any> {
+    return this.http.post(`http://localhost:3000/logout`, logout);
+  }
+
   // --- METODOS DEL DASHBOARD ---
   getAllSurveys(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/surveys`);

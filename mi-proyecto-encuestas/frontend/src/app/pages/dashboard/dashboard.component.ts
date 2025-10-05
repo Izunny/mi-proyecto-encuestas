@@ -16,6 +16,7 @@ export class DashboardComponent implements OnInit {
   filteredSurveys: any[] = [];
   selectedSurveyId: number | null = null;
   searchTerm: string = '';
+  json: any[] = [];
 
   viewMode: 'user' | 'all' = 'user'; 
   currentUserId: number = 1; 
@@ -26,6 +27,12 @@ export class DashboardComponent implements OnInit {
     this.loadUserSurveys();
   }
 
+  logoutUser(): void {
+    this.encuestasService.logout(this.json).subscribe((data: any[]) => {
+      this.json = data;
+    });
+  }
+  
   loadUserSurveys(): void {
     this.encuestasService.getSurveysByUser(this.currentUserId).subscribe((data: any[]) => {
       this.surveys = data;

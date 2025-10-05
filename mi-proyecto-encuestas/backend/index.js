@@ -3,10 +3,18 @@ const mysql = require('mysql2');
 const cors = require('cors');
 const bcrypt = require('bcrypt');
 const crypto = require('crypto');
+const jwt = require('jsonwebtoken');
+const cookieParser = require('cookie-parser')
 
 const app = express();
+
 app.use(cors());
 app.use(express.json());
+app.use(cookieParser())
+
+
+// Clave secreta para JWT
+const clave_secreta = 'clave_secreta';;
 
 const db = mysql.createPool({
   host: 'localhost',
@@ -23,6 +31,18 @@ app.listen(PORT, () => {
   console.log(`🚀 Servidor backend corriendo en http://localhost:${PORT}`);
 });
 
+app.use((req, res, next) => {
+  const token = req.cookies.access_token
+
+  req.session = { user: null }
+
+  try {
+    data = jwt.verify(token, clave_secreta)
+    req.session.user = data
+  } catch {}
+
+  next()
+})
 
 // Registro de usuario (tu endpoint extendido)
 app.post('/register', (req, res) => {
@@ -78,9 +98,37 @@ app.post('/login', (req, res) => {
       return res.status(500).json({ error: 'Error interno del servidor al iniciar sesión.' });
     }
 
-    res.status(200).json({ message: '¡Inicio de sesión con éxito!', usuario: results[0].username, userId: results[0].idusuario });
+    try {
+      // Generar un token de sesión JWT
+      const user = { usuario: results[0].username, id: results[0].idusuario };
+      const token = jwt.sign ({ id : user.id, username: user.usuario }, clave_secreta, { expiresIn: '2h' });
+      res
+        .cookie('access_token', token, {
+          httpOnly: true, 
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'strict',
+          maxAge: 1000 * 60 * 60
+        })
+        .send({ user, token })
+      //res.status(200).json({ message: '¡Inicio de sesión con éxito!', usuario: results[0].username, userId: results[0].idusuario });
+    } catch {
+      res.status(401).send(error.message)
+    }
+
 });
 });
+
+app.get('/protected', (req, res) => {
+  const { user } = req.session
+  if (!user) return res.status(403).send('Acess not authorized')
+});
+
+
+app.post('/logout', (req, res) => {
+  res
+    .clearCookie('access_token')
+    .json({message: 'Logout succesfully'})
+})
 
 // READ
 app.get('/usuarios', (req, res) => {
@@ -108,8 +156,6 @@ app.delete('/usuarios/:id', (req, res) => {
     res.json(result);
   });
 });
-
-
 
 
 // OBTENER TODAS LAS ENCUESTAS (CON EL NOMBRE DEL USUARIO)
