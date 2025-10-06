@@ -73,6 +73,10 @@
     margin-right: 8px;
   }
 }
+.btn-secondary-text {
+  background-color: #1f50c0;
+  
+}
 .btn-secondary:hover {
   background-color: var(--border-color);
 }
@@ -112,7 +116,7 @@
 
 .dropdown-menu {
   position: absolute;
-  background-color: #43136E;
+  background-color: #13327a;
   border: 1px solid #ffffff;
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(113, 25, 116, 0.15);
@@ -136,7 +140,7 @@
       color: #ffffff;
     }
     &:hover {
-      background-color: #5a2c82; 
+      background-color: #13327a; 
     }
   }
 }
