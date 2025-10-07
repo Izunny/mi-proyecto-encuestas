@@ -3,13 +3,15 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { EncuestasService } from '../../services/encuestas.service';
+import { CdkDragDrop, moveItemInArray, DragDropModule } from '@angular/cdk/drag-drop';
 
 @Component({
   selector: 'app-encuesta-editar',
   standalone: true,
-  imports: [ CommonModule, ReactiveFormsModule ],
+  imports: [ CommonModule, ReactiveFormsModule, DragDropModule ],
   templateUrl: './encuesta-editar.component.html',
   styleUrls: ['./encuesta-editar.component.scss']
+  
 })
 export class EncuestaEditarComponent implements OnInit {
   surveyForm!: FormGroup;
@@ -34,6 +36,12 @@ export class EncuestaEditarComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router
   ) { }
+
+  onQuestionDrop(event: CdkDragDrop<string[]>) {
+    const preguntasArray = this.preguntas();
+    // Esta función mágica del CDK reordena el FormArray por nosotros
+    moveItemInArray(preguntasArray.controls, event.previousIndex, event.currentIndex);
+  }
 
   ngOnInit(): void {
     this.surveyForm = this.fb.group({
@@ -92,6 +100,8 @@ export class EncuestaEditarComponent implements OnInit {
       }
     });
   }
+
+  
 
   // --- MÉTODOS REUTILIZADOS PARA MANEJAR LOS MENÚS ---
 
