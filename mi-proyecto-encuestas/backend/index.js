@@ -16,6 +16,22 @@ app.use(cookieParser())
 // Clave secreta para JWT
 const clave_secreta = 'clave_secreta';;
 
+const verifyToken = (req, res, next) => {
+  const token = req.cookies.access_token;
+
+  if (!token) {
+    return res.status(401).json({ error: 'Acceso denegado. No se proporcionó un token.' });
+  }
+
+  try {
+    const userData = jwt.verify(token, clave_secreta);
+    req.user = userData; // <-- ¡IMPORTANTE! Añadimos los datos del usuario al objeto 'req'
+    next(); // El token es válido, permite que la petición continúe
+  } catch (error) {
+    return res.status(403).json({ error: 'Token no válido o expirado.' });
+  }
+};
+
 const db = mysql.createPool({
   host: 'localhost',
   user: 'root',
@@ -158,7 +174,7 @@ app.delete('/usuarios/:id', (req, res) => {
 });
 
 
-// OBTENER TODAS LAS ENCUESTAS (CON EL NOMBRE DEL USUARIO)
+// OBTENER TODAS LAS ENCUESTAS 
 app.get('/api/surveys', (req, res) => {
   const sqlQuery = `
     SELECT 
@@ -178,26 +194,19 @@ app.get('/api/surveys', (req, res) => {
 });
 
 // OBTENER LAS ENCUESTAS DE UN USUARIO ESPECIFICO
-app.get('/api/surveys', (req, res) => {
-  // Añadimos una subconsulta para contar las respuestas de cada encuesta
-  const sqlQuery = `
-    SELECT 
-      e.*, 
-      u.nombreU,
-      (SELECT COUNT(*) FROM enc_respuesta er WHERE er.idencuesta = e.idencuesta) as responseCount
-    FROM enc_encuestasm e
-    JOIN usuarios u ON e.idusuario = u.idusuario;
-  `;
+// OBTENER LAS ENCUESTAS DEL USUARIO LOGUEADO
+app.get('/api/my-surveys', verifyToken, (req, res) => {
+  const userId = req.user.id; // <-- Obtenemos el ID del usuario directamente del token verificado
 
-  db.query(sqlQuery, (err, results) => {
+  const sqlQuery = `SELECT * FROM enc_encuestasm WHERE idusuario = ? ORDER BY idencuesta ASC`;
+  
+  db.query(sqlQuery, [userId], (err, results) => {
     if (err) {
-      console.error('Error al obtener todas las encuestas:', err);
-      return res.status(500).json({ error: 'Error interno del servidor.' });
+      return res.status(500).json({ error: 'Error al obtener las encuestas.' });
     }
     res.json(results);
   });
 });
-
 
 app.put('/api/surveys/:surveyId/status', (req, res) => {
   const { surveyId } = req.params;
@@ -229,6 +238,7 @@ app.put('/api/surveys/:surveyId/status', (req, res) => {
 // CREAR UNA NUEVA ENCUESTA 
 app.post('/api/surveys', async (req, res) => {
   const { nombre, descripcion, fecha, activo, idusuario, preguntas } = req.body;
+  
 
   const connection = await db.promise().getConnection();
 
@@ -290,7 +300,10 @@ app.get('/api/surveys/:id', async (req, res) => {
     const encuesta = surveyRows[0];
     encuesta.hasResponses = hasResponses; // 
 
-    const [questions] = await connection.query('SELECT * FROM enc_pregunta WHERE idencuesta = ?', [id]);
+    const [questions] = await connection.query(
+  'SELECT * FROM enc_pregunta WHERE idencuesta = ? ORDER BY orden ASC', // <-- Asegúrate de que 'ORDER BY orden ASC' esté aquí
+  [id]
+);
     
     for (const pregunta of questions) {
       if (pregunta.idtipopregunta === 3 || pregunta.idtipopregunta === 4) {
@@ -315,7 +328,12 @@ app.get('/api/surveys/:id', async (req, res) => {
 
 
 // ACTUALIZAR UNA ENCUESTA EXISTENTE
+// ACTUALIZAR UNA ENCUESTA EXISTENTE (CON MENSAJES DE DEPURACIÓN)
 app.put('/api/surveys/:id', async (req, res) => {
+  // --- MENSAJE DE CONTROL 1: ¿Qué datos están llegando? ---
+  console.log('--- BACKEND: Petición recibida para actualizar encuesta ---');
+  console.log('Datos recibidos en req.body:', JSON.stringify(req.body, null, 2));
+
   const { id: surveyId } = req.params;
   const { nombre, descripcion, activo, preguntas } = req.body;
   const connection = await db.promise().getConnection();
@@ -336,9 +354,24 @@ app.put('/api/surveys/:id', async (req, res) => {
         await connection.query('DELETE FROM enc_pregunta WHERE idencuesta = ?', [surveyId]);
       }
 
+      console.log('--- BACKEND: Empezando a guardar preguntas en la BD ---');
       for (const pregunta of preguntas) {
+        // --- MENSAJE DE CONTROL 2: ¿Qué orden se está guardando? ---
+        console.log(`Guardando pregunta: "${pregunta.textopregunta}" con orden: ${pregunta.orden}`);
+
         const esRequerida = pregunta.requerida ? 'S' : 'N';
-        const [questionResult] = await connection.query('INSERT INTO enc_pregunta (idencuesta, textopregunta, requerida, idtipopregunta) VALUES (?, ?, ?, ?)', [surveyId, pregunta.textopregunta, esRequerida, pregunta.idtipopregunta]);
+        
+        const questionQuery = `
+          INSERT INTO enc_pregunta 
+          (idencuesta, textopregunta, requerida, idtipopregunta, orden) 
+          VALUES (?, ?, ?, ?, ?)
+        `;
+        
+        const [questionResult] = await connection.query(
+          questionQuery, 
+          [surveyId, pregunta.textopregunta, esRequerida, pregunta.idtipopregunta, pregunta.orden] 
+        );
+
         const newQuestionId = questionResult.insertId;
 
         if (pregunta.opciones && (pregunta.idtipopregunta == '3' || pregunta.idtipopregunta == '4')) {
@@ -350,6 +383,7 @@ app.put('/api/surveys/:id', async (req, res) => {
     }
 
     await connection.commit();
+    console.log('--- BACKEND: Encuesta actualizada con éxito. ---');
     res.json({ message: '¡Encuesta actualizada con éxito!', surveyId: surveyId });
 
   } catch (err) {

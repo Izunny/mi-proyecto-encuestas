@@ -103,7 +103,7 @@ export class EncuestaEditarComponent implements OnInit {
 
   
 
-  // --- MÉTODOS REUTILIZADOS PARA MANEJAR LOS MENÚS ---
+  // --- METODOS REUTILIZADOS PARA MANEJAR LOS MENUS ---
 
   toggleQuestionMenu(index: number): void {
     this.openQuestionMenuIndex = this.openQuestionMenuIndex === index ? null : index;
@@ -132,7 +132,7 @@ export class EncuestaEditarComponent implements OnInit {
     this.openQuestionMenuIndex = null;
   }
 
-  // --- MÉTODOS REUTILIZADOS PARA GESTIONAR PREGUNTAS Y OPCIONES ---
+  // --- METODOS REUTILIZADOS PARA GESTIONAR PREGUNTAS Y OPCIONES ---
 
   preguntas(): FormArray {
     return this.surveyForm.get('preguntas') as FormArray;
@@ -173,14 +173,36 @@ export class EncuestaEditarComponent implements OnInit {
     this.opciones(preguntaIndex).removeAt(opcionIndex);
   }
 
-  // --- NAVEGACIÓN Y ENVÍO DEL FORMULARIO ---
+  // --- NAVEGACION Y ENVIO DEL FORMULARIO ---
 
   onSubmit() {
     if (this.surveyForm.invalid) {
       alert('Formulario inválido.');
       return;
     }
-    this.encuestasService.updateSurvey(this.surveyId, this.surveyForm.value).subscribe({
+
+    // Get the static values (name, description)
+    const formValue = this.surveyForm.getRawValue();
+
+    // THIS IS THE FIX:
+    // Manually build the 'preguntas' array from the reordered controls
+    const reorderedPreguntas = this.preguntas().controls.map((control, index) => {
+      return {
+        ...control.value, // Get the value of each question FormGroup
+        orden: index + 1   // Assign the order based on its new position in the array
+      };
+    });
+
+    // Create the final payload with the correctly ordered questions
+    const payload = {
+      ...formValue,
+      preguntas: reorderedPreguntas
+    };
+
+    console.log('Enviando payload CORREGIDO al backend:', payload);
+
+    // Send the corrected payload to your service
+    this.encuestasService.updateSurvey(this.surveyId, payload).subscribe({
       next: () => {
         alert('¡Encuesta actualizada con éxito!');
         this.router.navigate(['/dashboard']);
@@ -192,7 +214,7 @@ export class EncuestaEditarComponent implements OnInit {
     });
   }
 
-  goBack() {
-    this.router.navigate(['/dashboard']);
+    goBack(): void {
+    this.router.navigate(['/dashboard']); // O a la ruta a la que quieras volver
   }
 }
