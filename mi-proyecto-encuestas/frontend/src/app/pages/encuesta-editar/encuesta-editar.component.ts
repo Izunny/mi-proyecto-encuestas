@@ -18,7 +18,7 @@ export class EncuestaEditarComponent implements OnInit {
   surveyId!: number;
   isLoading = true;
 
- 
+  public isSettingsOpen = false;
   public isAddQuestionMenuOpen = false;
   public openQuestionMenuIndex: number | null = null;
   private questionTypeIcons: { [key: string]: string } = {
@@ -29,6 +29,7 @@ export class EncuestaEditarComponent implements OnInit {
     '5': 'fas fa-sliders-h',      // Slider
     '6': 'fas fa-star'            // Ranking
   };
+  
 
   constructor(
     private fb: FormBuilder,
@@ -36,6 +37,18 @@ export class EncuestaEditarComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router
   ) { }
+
+  toggleSettingsSidebar(): void {
+    this.isSettingsOpen = !this.isSettingsOpen;
+  }
+
+  toggleActivo(): void {
+    const activoControl = this.surveyForm.get('activo');
+    if (activoControl) {
+      const nuevoValor = activoControl.value === 'S' ? 'N' : 'S';
+      activoControl.setValue(nuevoValor);
+    }
+  }
 
   onQuestionDrop(event: CdkDragDrop<string[]>) {
     const preguntasArray = this.preguntas();
@@ -209,6 +222,9 @@ export class EncuestaEditarComponent implements OnInit {
   }
 
     goBack(): void {
-    this.router.navigate(['/dashboard']); // O a la ruta a la que quieras volver
+    this.router.navigate(['/dashboard']); 
   }
+
+  
+
 }

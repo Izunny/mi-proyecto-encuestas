@@ -9,8 +9,9 @@
 
       <h1 class="app-title">Encuestas Dinamicas</h1>
       <div class="header-actions">
-        <button class="btn btn-secondary"><i class="fas fa-download"></i> Descargar</button>
-        <button class="btn btn-secondary"><i class="fas fa-share-alt"></i> Compartir</button>
+          <button type="button" (click)="toggleSettingsSidebar()" class="btn btn-secondary">
+          <i class="fas fa-cog"></i> Ajustes
+          </button>
       </div>
     </header>
 
@@ -119,4 +120,34 @@
       </form>
     </div>
   </main>
+
+  <aside class="settings-sidebar" [class.is-open]="isSettingsOpen">
+    <div class="sidebar-header">
+      <h4>Ajustes de la Encuesta</h4>
+      <button (click)="toggleSettingsSidebar()" class="btn-icon">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    
+    <div class="sidebar-body" [formGroup]="surveyForm">
+      <div class="form-group">
+        <label for="descripcion">Descripción</label>
+        <textarea id="descripcion" formControlName="descripcion" class="form-control" rows="4"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>Estado</label>
+        <div class="switch-container">
+          <span>Activa</span>
+          <label class="switch">
+            <input type="checkbox" [checked]="surveyForm.get('activo')?.value === 'S'" (change)="toggleActivo()">
+            <span class="slider round"></span>
+          </label>
+         
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="overlay" [class.is-active]="isSettingsOpen" (click)="toggleSettingsSidebar()"></div>
 </div>

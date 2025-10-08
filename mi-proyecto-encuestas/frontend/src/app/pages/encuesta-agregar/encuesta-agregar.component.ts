@@ -19,7 +19,7 @@ import { CdkDragDrop, moveItemInArray, DragDropModule } from '@angular/cdk/drag-
 export class EncuestaAgregarComponent implements OnInit {
   surveyForm!: FormGroup;
   
-
+  public isSettingsOpen = false;
   public isAddQuestionMenuOpen = false; 
   public openQuestionMenuIndex: number | null = null; 
   private questionTypeIcons: { [key: string]: string } = {
@@ -36,6 +36,18 @@ export class EncuestaAgregarComponent implements OnInit {
     private encuestasService: EncuestasService,
     private router: Router
   ) { }
+
+  toggleSettingsSidebar(): void {
+    this.isSettingsOpen = !this.isSettingsOpen;
+  }
+
+  toggleActivo(): void {
+    const activoControl = this.surveyForm.get('activo');
+    if (activoControl) {
+      const nuevoValor = activoControl.value === 'S' ? 'N' : 'S';
+      activoControl.setValue(nuevoValor);
+    }
+  }
 
   ngOnInit(): void {
     this.surveyForm = this.fb.group({
