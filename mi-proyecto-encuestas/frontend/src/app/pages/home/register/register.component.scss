@@ -1,5 +1,15 @@
 /* src/app/landing/landing.component.scss */
 
+.main-header {
+  width: 90%;
+  display: flex;
+  padding: 0px 20px 0px 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
 /* Formas en el background */
 #oval {
   width: 200px;
@@ -8,6 +18,24 @@
   border-radius: 100px / 50px;
 }
 
+.main-nav {
+  display: flex;
+  align-items: center;
+  gap: 0px;
+  margin-left: auto;
+  
+  
+  a {
+    text-decoration: none;
+    color: var(--text-color);
+    font-weight: 500;
+    transition: color 0.3s ease;
+
+    &:hover {
+      color: var(--highlight-color);
+    }
+  }
+}
 
 .landing-container {
   display: flex;
