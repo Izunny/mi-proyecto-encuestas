@@ -125,12 +125,11 @@ app.post('/login', (req, res) => {
           sameSite: 'strict',
           maxAge: 1000 * 60 * 60
         })
-        .send({ token })
+        .send({ token, user })
       //res.status(200).json({ message: '¡Inicio de sesión con éxito!', usuario: results[0].username, userId: results[0].idusuario });
     } catch {
       res.status(401).send(error.message)
     }
-
 });
 });
 
@@ -175,7 +174,7 @@ app.delete('/usuarios/:id', (req, res) => {
 
 
 // OBTENER TODAS LAS ENCUESTAS 
-app.get('/api/surveys', (req, res) => {
+app.get('/api/surveys/', (req, res) => {
   const sqlQuery = `
     SELECT 
       e.*, 
@@ -282,7 +281,7 @@ app.post('/api/surveys', async (req, res) => {
 
 
 // OBTENER UNA ENCUESTA ESPECIFICA POR SU ID (CON PREGUNTAS Y OPCIONES)
-app.get('/api/surveys/:id', async (req, res) => {
+app.get('/api/surveys/user/:id', async (req, res) => {
   const { id } = req.params;
   const connection = await db.promise().getConnection();
 

@@ -42,10 +42,10 @@ export class LoginComponent implements OnInit{
       return;
     }
 
-    console.log(this.loginForm.value)
     this.username = this.loginForm.controls['username'].value;
     this.password = this.loginForm.controls['password'].value;
     
+
     this.authService.login(this.username, this.password).subscribe({
       next: () => this.router.navigate(['/dashboard']),
       error: (err) => console.error('Login failed', err)

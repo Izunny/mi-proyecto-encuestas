@@ -18,21 +18,26 @@ export class DashboardComponent implements OnInit {
   selectedSurveyId: number | null = null;
   searchTerm: string = '';
   json: any[] = [];
-
   viewMode: 'user' | 'all' = 'user'; 
-  currentUserId: number = 1; 
+  currentUserId: number = 0; 
+  idString: string | null = "";
 
   constructor(private encuestasService: EncuestasService, private AuthService: AuthService) { }
+
 
   ngOnInit(): void {
     this.loadUserSurveys();
   }
+
 
   logout(): void {
     this.AuthService.logout();
   }
   
   loadUserSurveys(): void {
+    this.idString = this.AuthService.getID();
+    this.currentUserId = Number(this.idString) 
+    console.log(this.currentUserId)
     this.encuestasService.getSurveysByUser(this.currentUserId).subscribe((data: any[]) => {
       this.surveys = data;
       this.filterSurveys(); 

@@ -10,18 +10,23 @@ export class AuthService {
   private LOGIN_URL = 'http://localhost:3000/login';
 
   private tokenKey = 'authToken';
-
+  private idusuario = 'id';
   constructor(private httpClient: HttpClient, private router: Router) {}
+
+
   login(username: string, password: string): Observable<any>{
-    console.log(username, "h");
     return this.httpClient.post<any>(this.LOGIN_URL, {username, password}).pipe(
       tap(response =>  {
         if(response.token) {
-          console.log(response.token);
           this.setToken(response.token);
+          this.setID(response.user["id"]);
         }
       })
     )
+  }
+
+  private setID(user: string): void {
+    localStorage.setItem(this.idusuario, user)
   }
 
   private setToken(token: string): void {
@@ -34,7 +39,15 @@ export class AuthService {
     } else {
       return null;
     }
-  }    
+  }
+  
+  getID(): string | null {
+    if(typeof window !== 'undefined'){
+      return localStorage.getItem(this.idusuario);
+    } else {
+      return null;
+    }
+  }
 
   isAuthenticated(): boolean {
     const token = this.getToken();
@@ -47,8 +60,12 @@ export class AuthService {
     return Date.now() < exp;
   }
 
+
+
   logout(): void {
     localStorage.removeItem(this.tokenKey);
+    localStorage.removeItem(this.idusuario);
     this.router.navigate(['/login']);
   }
+
 }
