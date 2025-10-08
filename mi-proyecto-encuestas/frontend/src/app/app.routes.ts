@@ -12,19 +12,21 @@ import { EncuestaResultadosComponent } from './pages/encuesta-resultados/encuest
 import { TokenExpiradoComponent } from './pages/token-expirado/token-expirado.component';
 import { AboutusComponent } from './pages/home/aboutus/aboutus.component';
 import { ComoComponent } from './pages/home/como/como.component';
+import { AuthGuard } from './guard/auth.guard';
+import { AuthenticatedGuard } from './guard/authenticated.guard';
 
 export const routes: Routes = [
-    { path: '', component: LandingComponent }, // La página principal
-    { path: 'registro', component: RegisterComponent },
-    { path: 'login', component: LoginComponent },
-    { path: 'dashboard', component: DashboardComponent }, // Esta será una ruta protegida más adelante
-    { path: 'encuesta/agregar', component: EncuestaAgregarComponent },
-    { path: 'encuesta/editar/:id', component: EncuestaEditarComponent }, // Usamos :id para pasar el ID de la encuesta
-    { path: 'encuesta/responder/:id', component: EncuestaResponderComponent },
-    { path: 'encuesta/resultados/:id', component: EncuestaResultadosComponent },
-    { path: 'token-expirado', component: TokenExpiradoComponent },
-    { path: 'aboutus', component: AboutusComponent }, // La página principal
-    { path: 'como', component: ComoComponent },
+    { path: '', component: LandingComponent, canActivate: [AuthenticatedGuard]}, // La página principal
+    { path: 'registro', component: RegisterComponent, canActivate: [AuthenticatedGuard] },
+    { path: 'login', component: LoginComponent, canActivate: [AuthenticatedGuard] },
+    { path: 'dashboard', component: DashboardComponent, canActivate: [AuthGuard]}, // Esta será una ruta protegida más adelante
+    { path: 'encuesta/agregar', component: EncuestaAgregarComponent, canActivate: [AuthGuard] },
+    { path: 'encuesta/editar/:id', component: EncuestaEditarComponent, canActivate: [AuthGuard] }, // Usamos :id para pasar el ID de la encuesta
+    { path: 'encuesta/responder/:id', component: EncuestaResponderComponent, canActivate: [AuthGuard] },
+    { path: 'encuesta/resultados/:id', component: EncuestaResultadosComponent, canActivate: [AuthGuard] },
+    { path: 'token-expirado', component: TokenExpiradoComponent, canActivate: [AuthGuard] },
+    { path: 'aboutus', component: AboutusComponent, canActivate: [AuthenticatedGuard]}, // La página principal
+    { path: 'como', component: ComoComponent, canActivate: [AuthenticatedGuard] },
 
     // Redirige cualquier ruta no encontrada a la página principal
     { path: '**', redirectTo: '', pathMatch: 'full' } 

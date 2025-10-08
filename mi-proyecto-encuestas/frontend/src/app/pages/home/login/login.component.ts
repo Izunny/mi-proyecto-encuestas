@@ -1,33 +1,37 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common'; 
-import { ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators, FormsModule } from '@angular/forms';
 import { Router } from '@angular/router'; 
-import { LoginService } from '../../../services/login.service'; 
+import { AuthService } from '../../../services/auth.service'; 
 
 @Component({
   selector: 'app-login',
   standalone: true,
   imports: [    
     CommonModule,
-    ReactiveFormsModule 
+    ReactiveFormsModule,
+    FormsModule,
   ],
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss']
 })
 
 export class LoginComponent implements OnInit{
-  loginForm!: FormGroup;
 
+  loginForm!: FormGroup;
+  
+  username = "";
+  password = "";
   constructor(
-    private fb: FormBuilder,
-    private LoginService: LoginService,
-    private router: Router
-  ) { }
+    private authService: AuthService, 
+    private router: Router, 
+    private fb: FormBuilder,){
+  }
 
   ngOnInit(): void {
     this.loginForm = this.fb.group({
-      username: ['', Validators.required], 
-      password: ['', Validators.required],
+      username: [''], 
+      password: [''],
     });
   }
 
@@ -37,42 +41,16 @@ export class LoginComponent implements OnInit{
       this.loginForm.markAllAsTouched(); 
       return;
     }
-      this.LoginService.loginUser(this.loginForm.value).subscribe({
-        next: (response) => {
-          alert('!Inicio de sesión exitoso!');
-          this.router.navigate(['/dashboard']); 
-        },
-        error: (err) => {
-          console.error('Error en tu inicio de sesión:', err);
-          alert('Ocurrió un error. Revisa la consola para más detalles.');
-        }
-    });
+
+    console.log(this.loginForm.value)
+    this.username = this.loginForm.controls['username'].value;
+    this.password = this.loginForm.controls['password'].value;
+    
+    this.authService.login(this.username, this.password).subscribe({
+      next: () => this.router.navigate(['/dashboard']),
+      error: (err) => console.error('Login failed', err)
+    })
   }
-
-
 }
-  /*
-  export class LoginComponent {
-    username = '';
-    password = '';
-    errorMessage = '';
 
-    constructor(private http: HttpClient, private router: Router) {}
 
-    onSubmit() {
-      this.errorMessage = ''; // Clear previous errors
-      this.http.post('http://localhost:3000/api/login', { username: this.username, password: this.password })
-        .subscribe({
-          next: (response: any) => {
-            // Assuming a successful login returns a token or success message
-            console.log('Login successful:', response);
-            this.router.navigate(['/dashboard']); // Navigate to a dashboard or home page
-          },
-          error: (error) => {
-            console.error('Login failed:', error);
-            this.errorMessage = error.error.message || 'Login failed. Please try again.';
-          }
-        });
-    }
-  }
-*/

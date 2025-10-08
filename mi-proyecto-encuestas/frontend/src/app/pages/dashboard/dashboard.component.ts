@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { EncuestasService } from '../../services/encuestas.service';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -21,16 +22,14 @@ export class DashboardComponent implements OnInit {
   viewMode: 'user' | 'all' = 'user'; 
   currentUserId: number = 1; 
 
-  constructor(private encuestasService: EncuestasService) { }
+  constructor(private encuestasService: EncuestasService, private AuthService: AuthService) { }
 
   ngOnInit(): void {
     this.loadUserSurveys();
   }
 
-  logoutUser(): void {
-    this.encuestasService.logout(this.json).subscribe((data: any[]) => {
-      this.json = data;
-    });
+  logout(): void {
+    this.AuthService.logout();
   }
   
   loadUserSurveys(): void {

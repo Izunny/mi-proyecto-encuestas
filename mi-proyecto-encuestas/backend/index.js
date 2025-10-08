@@ -125,7 +125,7 @@ app.post('/login', (req, res) => {
           sameSite: 'strict',
           maxAge: 1000 * 60 * 60
         })
-        .send({ user, token })
+        .send({ token })
       //res.status(200).json({ message: '¡Inicio de sesión con éxito!', usuario: results[0].username, userId: results[0].idusuario });
     } catch {
       res.status(401).send(error.message)
