@@ -75,7 +75,6 @@ export class EncuestaEditarComponent implements OnInit {
         });
 
         data.preguntas.forEach((pregunta: any) => {
-          // Usamos la misma función 'nuevaPregunta' para mantener la consistencia
           const preguntaFormGroup = this.nuevaPregunta(pregunta.idtipopregunta.toString());
           preguntaFormGroup.patchValue({
             textopregunta: pregunta.textopregunta,
@@ -181,19 +180,15 @@ export class EncuestaEditarComponent implements OnInit {
       return;
     }
 
-    // Get the static values (name, description)
     const formValue = this.surveyForm.getRawValue();
 
-    // THIS IS THE FIX:
-    // Manually build the 'preguntas' array from the reordered controls
     const reorderedPreguntas = this.preguntas().controls.map((control, index) => {
       return {
-        ...control.value, // Get the value of each question FormGroup
-        orden: index + 1   // Assign the order based on its new position in the array
+        ...control.value, 
+        orden: index + 1   
       };
     });
 
-    // Create the final payload with the correctly ordered questions
     const payload = {
       ...formValue,
       preguntas: reorderedPreguntas
@@ -201,7 +196,6 @@ export class EncuestaEditarComponent implements OnInit {
 
     console.log('Enviando payload CORREGIDO al backend:', payload);
 
-    // Send the corrected payload to your service
     this.encuestasService.updateSurvey(this.surveyId, payload).subscribe({
       next: () => {
         alert('¡Encuesta actualizada con éxito!');

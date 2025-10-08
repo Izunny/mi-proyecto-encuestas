@@ -25,8 +25,8 @@ const verifyToken = (req, res, next) => {
 
   try {
     const userData = jwt.verify(token, clave_secreta);
-    req.user = userData; // <-- ¡IMPORTANTE! Añadimos los datos del usuario al objeto 'req'
-    next(); // El token es válido, permite que la petición continúe
+    req.user = userData; 
+    next(); 
   } catch (error) {
     return res.status(403).json({ error: 'Token no válido o expirado.' });
   }
@@ -194,9 +194,8 @@ app.get('/api/surveys', (req, res) => {
 });
 
 // OBTENER LAS ENCUESTAS DE UN USUARIO ESPECIFICO
-// OBTENER LAS ENCUESTAS DEL USUARIO LOGUEADO
 app.get('/api/my-surveys', verifyToken, (req, res) => {
-  const userId = req.user.id; // <-- Obtenemos el ID del usuario directamente del token verificado
+  const userId = req.user.id; 
 
   const sqlQuery = `SELECT * FROM enc_encuestasm WHERE idusuario = ? ORDER BY idencuesta ASC`;
   
@@ -328,9 +327,8 @@ app.get('/api/surveys/:id', async (req, res) => {
 
 
 // ACTUALIZAR UNA ENCUESTA EXISTENTE
-// ACTUALIZAR UNA ENCUESTA EXISTENTE (CON MENSAJES DE DEPURACIÓN)
 app.put('/api/surveys/:id', async (req, res) => {
-  // --- MENSAJE DE CONTROL 1: ¿Qué datos están llegando? ---
+
   console.log('--- BACKEND: Petición recibida para actualizar encuesta ---');
   console.log('Datos recibidos en req.body:', JSON.stringify(req.body, null, 2));
 
@@ -356,7 +354,7 @@ app.put('/api/surveys/:id', async (req, res) => {
 
       console.log('--- BACKEND: Empezando a guardar preguntas en la BD ---');
       for (const pregunta of preguntas) {
-        // --- MENSAJE DE CONTROL 2: ¿Qué orden se está guardando? ---
+        
         console.log(`Guardando pregunta: "${pregunta.textopregunta}" con orden: ${pregunta.orden}`);
 
         const esRequerida = pregunta.requerida ? 'S' : 'N';

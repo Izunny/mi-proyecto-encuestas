@@ -3,13 +3,15 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
 import { Router } from '@angular/router'; 
 import { EncuestasService } from '../../services/encuestas.service'; 
+import { CdkDragDrop, moveItemInArray, DragDropModule } from '@angular/cdk/drag-drop';
 
 @Component({
   selector: 'app-encuesta-agregar',
   standalone: true,
   imports: [
     CommonModule,
-    ReactiveFormsModule 
+    ReactiveFormsModule,
+    DragDropModule  
   ],
   templateUrl: './encuesta-agregar.component.html',
   styleUrls: ['./encuesta-agregar.component.scss']
@@ -49,6 +51,13 @@ export class EncuestaAgregarComponent implements OnInit {
   public getIconForQuestionType(typeId: string): string {
     return this.questionTypeIcons[typeId] || 'fas fa-list-ul';
   }
+
+  onQuestionDrop(event: CdkDragDrop<string[]>) {
+    const preguntasArray = this.preguntas();
+    moveItemInArray(preguntasArray.controls, event.previousIndex, event.currentIndex);
+  }
+
+  
 
   // --- METODOS PARA MANEJAR LOS MENUS DE CADA PREGUNTA ---
 
@@ -132,8 +141,24 @@ export class EncuestaAgregarComponent implements OnInit {
       this.surveyForm.markAllAsTouched(); 
       return;
     }
-    
-    this.encuestasService.createSurvey(this.surveyForm.value).subscribe({
+
+    const formValue = this.surveyForm.getRawValue();
+
+    const reorderedPreguntas = this.preguntas().controls.map((control, index) => {
+      return {
+        ...control.value, 
+        orden: index + 1   
+      };
+    });
+
+    const payload = {
+      ...formValue,
+      preguntas: reorderedPreguntas
+    };
+
+    console.log('Enviando payload al backend:', payload); 
+
+    this.encuestasService.createSurvey(payload).subscribe({
       next: (response) => {
         alert('¡Encuesta guardada con éxito!');
         this.router.navigate(['/dashboard']); 
