@@ -23,9 +23,9 @@ export class EncuestaEditarComponent implements OnInit {
   public openQuestionMenuIndex: number | null = null;
   private questionTypeIcons: { [key: string]: string } = {
     '1': 'fas fa-font',           // Texto Corto
-    '2': 'fas fa-paragraph',      // Párrafo
-    '3': 'fas fa-dot-circle',     // Opción Única
-    '4': 'fas fa-check-square',   // Opción Múltiple
+    '2': 'fas fa-paragraph',      // Parrafo
+    '3': 'fas fa-dot-circle',     // Opcion Unica
+    '4': 'fas fa-check-square',   // Opcion Multiple
     '5': 'fas fa-sliders-h',      // Slider
     '6': 'fas fa-star'            // Ranking
   };
