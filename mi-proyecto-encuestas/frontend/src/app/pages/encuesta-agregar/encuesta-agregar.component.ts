@@ -4,6 +4,7 @@ import { ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators } fr
 import { Router } from '@angular/router'; 
 import { EncuestasService } from '../../services/encuestas.service'; 
 import { CdkDragDrop, moveItemInArray, DragDropModule } from '@angular/cdk/drag-drop';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-encuesta-agregar',
@@ -16,9 +17,9 @@ import { CdkDragDrop, moveItemInArray, DragDropModule } from '@angular/cdk/drag-
   templateUrl: './encuesta-agregar.component.html',
   styleUrls: ['./encuesta-agregar.component.scss']
 })
+
 export class EncuestaAgregarComponent implements OnInit {
   surveyForm!: FormGroup;
-  
   public isSettingsOpen = false;
   public isAddQuestionMenuOpen = false; 
   public openQuestionMenuIndex: number | null = null; 
@@ -34,7 +35,8 @@ export class EncuestaAgregarComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private encuestasService: EncuestasService,
-    private router: Router
+    private router: Router,
+    private AuthService: AuthService,
   ) { }
 
   toggleSettingsSidebar(): void {
@@ -48,18 +50,19 @@ export class EncuestaAgregarComponent implements OnInit {
       activoControl.setValue(nuevoValor);
     }
   }
-
+  
+  
   ngOnInit(): void {
     this.surveyForm = this.fb.group({
       nombre: ['', Validators.required],
       descripcion: [''], 
       fecha: [new Date().toISOString().split('T')[0]], 
       activo: ['S', Validators.required],
-      idusuario: [1], 
+      idusuario: [this.AuthService.getID()], 
       preguntas: this.fb.array([])
     });
   }
-
+  
   public getIconForQuestionType(typeId: string): string {
     return this.questionTypeIcons[typeId] || 'fas fa-list-ul';
   }

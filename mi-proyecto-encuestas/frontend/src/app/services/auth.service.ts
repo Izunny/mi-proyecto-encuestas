@@ -41,13 +41,12 @@ export class AuthService {
     }
   }
   
-  getID(): string | null {
+  getID(): number | null {
     if(typeof window !== 'undefined'){
-      return localStorage.getItem(this.idusuario);
-    } else {
-      return null;
-    }
+      return Number(localStorage.getItem(this.idusuario));
+    } else {return null}
   }
+
 
   isAuthenticated(): boolean {
     const token = this.getToken();

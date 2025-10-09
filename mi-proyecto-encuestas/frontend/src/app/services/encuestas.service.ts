@@ -18,7 +18,7 @@ export class EncuestasService {
   getAllSurveys(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/surveys`);
   }
-  getSurveysByUser(userId: number): Observable<any[]> {
+  getSurveysByUser(userId: number | null): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/surveys/user/${userId}`);
   }
   updateSurveyStatus(surveyId: number, newStatus: string): Observable<any> {
@@ -30,7 +30,7 @@ export class EncuestasService {
 
   // --- METODOS DEL EDITOR DE ENCUESTAS ---
   getSurveyById(id: number): Observable<any> {
-    return this.http.get(`${this.apiUrl}/surveys/${id}`);
+    return this.http.get(`${this.apiUrl}/surveys/user/${id}`);
   }
   createSurvey(surveyData: any): Observable<any> {
     return this.http.post(`${this.apiUrl}/surveys`, surveyData);

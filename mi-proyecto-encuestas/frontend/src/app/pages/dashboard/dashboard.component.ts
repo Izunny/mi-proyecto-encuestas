@@ -19,8 +19,7 @@ export class DashboardComponent implements OnInit {
   searchTerm: string = '';
   json: any[] = [];
   viewMode: 'user' | 'all' = 'user'; 
-  currentUserId: number = 0; 
-  idString: string | null = "";
+  currentUserId: number | null = null; 
 
   constructor(private encuestasService: EncuestasService, private AuthService: AuthService) { }
 
@@ -35,8 +34,7 @@ export class DashboardComponent implements OnInit {
   }
   
   loadUserSurveys(): void {
-    this.idString = this.AuthService.getID();
-    this.currentUserId = Number(this.idString) 
+    this.currentUserId = this.AuthService.getID(); 
     console.log(this.currentUserId)
     this.encuestasService.getSurveysByUser(this.currentUserId).subscribe((data: any[]) => {
       this.surveys = data;
