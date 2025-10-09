@@ -1,0 +1,22 @@
+<header class="main-header">
+  <div class="header-left">
+    <a routerLink="/"><img class="img-logo" src="/assets/images/logo.png" alt="Logo"></a>
+    <div class="logo">
+      Encuestas Dinamicas
+    </div>
+  </div>
+  
+  <nav *ngIf="user$ | async as user; else loggedOut" class="main-nav">
+    <span>Hola, <b>{{ user.nombreU || user.username }}</b></span>
+    <a (click)="logout()" class="btn btn-secondary">Cerrar Sesión</a>
+  </nav>
+
+  <ng-template #loggedOut>
+    <nav class="main-nav">
+      <a routerLink="/aboutus">Nosotros</a>
+      <a routerLink="/como">Cómo Funciona</a>
+      <a routerLink="/login">Iniciar sesión</a>
+      <a routerLink="/registro" class="btn btn-primary">Regístrate</a>
+    </nav>
+  </ng-template>
+</header>

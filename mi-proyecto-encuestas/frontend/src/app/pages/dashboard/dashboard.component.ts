@@ -17,26 +17,33 @@ export class DashboardComponent implements OnInit {
   filteredSurveys: any[] = [];
   selectedSurveyId: number | null = null;
   searchTerm: string = '';
-  json: any[] = [];
   viewMode: 'user' | 'all' = 'user'; 
   currentUserId: number | null = null; 
 
-  constructor(private encuestasService: EncuestasService, private AuthService: AuthService) { }
+  constructor(
+    private encuestasService: EncuestasService, 
+    private authService: AuthService
+  ) { }
 
 
   ngOnInit(): void {
-    this.loadUserSurveys();
-  }
+    const currentUser = this.authService.getCurrentUser();
+    if (currentUser) {
+      // Guardamos el ID en la variable de la clase para usarlo en otros métodos
+      this.currentUserId = currentUser.id;
 
+      // LA CORRECCIÓN: Pasamos 'currentUser.id' directamente a la función.
+      // Así, TypeScript sabe sin lugar a dudas que le estamos pasando un número.
+      this.loadUserSurveys(currentUser.id); 
+    }
+  }
 
   logout(): void {
-    this.AuthService.logout();
+    this.authService.logout();
   }
   
-  loadUserSurveys(): void {
-    this.currentUserId = this.AuthService.getID(); 
-    console.log(this.currentUserId)
-    this.encuestasService.getSurveysByUser(this.currentUserId).subscribe((data: any[]) => {
+  loadUserSurveys(userId: number): void {
+    this.encuestasService.getSurveysByUser(userId).subscribe((data: any[]) => {
       this.surveys = data;
       this.filterSurveys(); 
     });
@@ -49,14 +56,16 @@ export class DashboardComponent implements OnInit {
     });
   }
 
-  toggleView(): void {
-    this.viewMode = this.viewMode === 'user' ? 'all' : 'user';
-    if (this.viewMode === 'user') {
-      this.loadUserSurveys();
-    } else {
-      this.loadAllSurveys();
+toggleView(): void {
+  this.viewMode = this.viewMode === 'user' ? 'all' : 'user';
+  if (this.viewMode === 'user') {
+    if (this.currentUserId) {
+      this.loadUserSurveys(this.currentUserId);
     }
+  } else {
+    this.loadAllSurveys();
   }
+}
 
   filterSurveys(): void {
     if (!this.searchTerm) {
@@ -105,7 +114,13 @@ export class DashboardComponent implements OnInit {
       this.encuestasService.deleteSurvey(this.selectedSurveyId).subscribe({
         next: () => {
           alert('Encuesta eliminada con éxito.');
-          this.viewMode === 'user' ? this.loadUserSurveys() : this.loadAllSurveys();
+          // CORRECCIÓN AQUÍ: Pasa el ID del usuario si es necesario
+          if (this.currentUserId) {
+            this.loadUserSurveys(this.currentUserId);
+
+          } else {
+            this.loadAllSurveys();
+          }
           this.selectedSurveyId = null;
         },
         error: (err: any) => {
@@ -115,4 +130,4 @@ export class DashboardComponent implements OnInit {
       });
     }
   }
-} 
+}

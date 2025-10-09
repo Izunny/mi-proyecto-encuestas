@@ -87,50 +87,63 @@ app.post('/register', (req, res) => {
   });
 });
 
-app.post('/login', (req, res) => {
+app.post('/login', async (req, res) => {
   const { username, password } = req.body;
+
   if (!username || !password) {
-    return res.status(400).json({ error: 'Faltan campos obligatorios.' });
+    return res.status(400).json({ error: 'Faltan el nombre de usuario o la contraseña.' });
   }
 
-  // Hashear la contraseña antes de guardarla
-  const hashedPassword = bcrypt.hashSync(password, 10);
+  const connection = db.promise(); // Usamos la versión con promesas para async/await
 
-  const sqlQuery = `SELECT * FROM usuarios WHERE username = ?;`;
-  db.query(sqlQuery, [username, hashedPassword], (err, results) => {
-    // Manejo de errores y validación de usuario
+  try {
+    // 1. Buscamos al usuario solo por su `username` en la base de datos.
+    const sqlQuery = `SELECT * FROM usuarios WHERE username = ?;`;
+    const [results] = await connection.query(sqlQuery, [username]);
 
+    // 2. Si la búsqueda no devuelve ningún resultado, el usuario no existe.
     if (results.length === 0) {
-      return res.status(401).json({ error: 'Nombre de usuario incorrecto.' });
+      return res.status(401).json({ error: 'Usuario o contraseña incorrectos.' });
     }
 
-    const match = bcrypt.compareSync(password, results[0].password_hash);
-    if (!match) {
-      return res.status(401).json({ error: 'Contraseña incorrecta.' });
-    }
-    
-    if (err) {
-      console.error('Error al iniciar sesión:', err);
-      return res.status(500).json({ error: 'Error interno del servidor al iniciar sesión.' });
+    const user = results[0];
+
+    // 3. Comparamos la contraseña que el usuario envió (en texto plano)
+    //    con el hash que está guardado en la base de datos (`user.password_hash`).
+    const isMatch = await bcrypt.compare(password, user.password_hash);
+
+    // 4. Si la comparación falla, la contraseña es incorrecta.
+    if (!isMatch) {
+      return res.status(401).json({ error: 'Usuario o contraseña incorrectos.' });
     }
 
-    try {
-      // Generar un token de sesión JWT
-      const user = { usuario: results[0].username, id: results[0].idusuario };
-      const token = jwt.sign ({ id : user.id, username: user.usuario }, clave_secreta, { expiresIn: '2h' });
-      res
-        .cookie('access_token', token, {
-          httpOnly: true, 
-          secure: process.env.NODE_ENV === 'production',
-          sameSite: 'strict',
-          maxAge: 1000 * 60 * 60
-        })
-        .send({ token, user })
-      //res.status(200).json({ message: '¡Inicio de sesión con éxito!', usuario: results[0].username, userId: results[0].idusuario });
-    } catch {
-      res.status(401).send(error.message)
-    }
-});
+    // 5. Si todo es correcto, generamos el token y la respuesta.
+    const payload = { id: user.idusuario, username: user.username };
+    const token = jwt.sign(payload, clave_secreta, { expiresIn: '2h' });
+
+    const userResponse = { 
+        id: user.idusuario, 
+        username: user.username, 
+        nombre: user.nombreU 
+    };
+
+    res.cookie('access_token', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: 1000 * 60 * 60 * 2 // 2 horas
+      })
+      .status(200)
+      .json({ 
+        message: '¡Inicio de sesión exitoso!',
+        user: userResponse,
+        token: token
+      });
+
+  } catch (error) {
+    console.error('Error en el servidor durante el login:', error);
+    res.status(500).json({ error: 'Error interno del servidor.' });
+  }
 });
 
 app.get('/protected', (req, res) => {
@@ -178,7 +191,7 @@ app.get('/api/surveys/', (req, res) => {
   const sqlQuery = `
     SELECT 
       e.*, 
-      u.nombreU 
+      u.username 
     FROM enc_encuestasm e  -- <-- CORREGIDO
     JOIN usuarios u ON e.idusuario = u.idusuario;
   `;

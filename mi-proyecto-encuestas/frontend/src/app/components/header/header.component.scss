@@ -6,6 +6,50 @@
   width: 100%; 
   
 }
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  .logo {
+    height: 40px;
+    width: 500px;
+  }
+
+  .title {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--text-color);
+  }
+}
+
+.main-header {
+  width: 90%;
+  display: flex;
+  padding: 0px 20px 0px 20px;
+  box-shadow: 0 2px px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.main-nav {
+  display: flex;
+  align-items: center;
+  gap: 0px;
+  margin-left: auto;
+  
+  a {
+    text-decoration: none;
+    color: var(--text-color);
+    font-weight: 500;
+    transition: color 0.3s ease;
+
+    &:hover {
+      color: var(--highlight-color);
+    }
+  }
+}
 
 
 :host {

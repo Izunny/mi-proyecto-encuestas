@@ -53,16 +53,20 @@ export class EncuestaAgregarComponent implements OnInit {
   
   
   ngOnInit(): void {
+    const currentUser = this.AuthService.getCurrentUser();
+
+    const userId = currentUser ? currentUser.id : null;
+
     this.surveyForm = this.fb.group({
       nombre: ['', Validators.required],
       descripcion: [''], 
       fecha: [new Date().toISOString().split('T')[0]], 
       activo: ['S', Validators.required],
-      idusuario: [this.AuthService.getID()], 
+      idusuario: [userId], 
       preguntas: this.fb.array([])
     });
   }
-  
+
   public getIconForQuestionType(typeId: string): string {
     return this.questionTypeIcons[typeId] || 'fas fa-list-ul';
   }

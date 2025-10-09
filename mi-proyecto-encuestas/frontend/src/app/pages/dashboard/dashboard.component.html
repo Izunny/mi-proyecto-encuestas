@@ -3,20 +3,6 @@
 
   <main class="main-content"> 
 
-    <header class="content-header">
-      <a href="#"><img class="img-logo" src="/assets/images/logo.png"></a>
-      <h1 class="app-title">Encuestas Dinamicas</h1>
-      <div class="header-actions">
-      </div>
-    
-
-      <div class="d-flex justify-content-between align-items-center">
-        <h3>Hola, <b>Usuario</b>.</h3>
-        <button (click)="logout()">Salir de sesión</button>
-      </div>
-    </header>
-
-
   <div class="mb-3">
 
     <nav class="nav-menu">
@@ -77,7 +63,7 @@
             </td>
             <td>{{ survey.nombre }}</td>
             <td>{{ survey.descripcion }}</td>
-            <td>{{ survey.nombreU }}</td>
+            <td>{{ survey.username }}</td>
             <td>{{ survey.fecha | date: 'dd/MM/yyyy' }}</td>
             <td>
               <button class="btn btn-sm" 
