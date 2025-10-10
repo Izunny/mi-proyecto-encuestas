@@ -16,9 +16,17 @@
 // Estilos base del body
 body {
   background-color: var(--bg-color);
+  background-image: url("/assets/images/shiny.svg");
+  background-repeat: no-repeat;
+background-position: center;
+  background-size: cover; /* Optional: Adjusts how the image covers the element */
   color: var(--text-color);
   font-family: var(--font-family);
   margin: 0;
+}
+
+a {
+  font-weight: bold;
 }
 
 // Estilos de botones reutilizables
@@ -58,22 +66,34 @@ body {
 .main-header {
     width: 1000px;
     height: 100px;
-    background-color: #1A2132;
+    background: #02002470;
     margin: 20px auto;   
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: space-between;
     border-radius: 20px;
 }
 
 .img-logo {
     width: 50px;
+    margin-top: 10px;
     padding: 0px 25px 0px 0px;
 }
 
 .logo {
     font-weight: bold;
     font-size: 1.5rem;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 50px;
+}
+
+.main-nav {
+  margin-right: 50px;
 }
 
 .main-nav a {

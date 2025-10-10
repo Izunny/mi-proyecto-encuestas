@@ -15,7 +15,15 @@
   box-sizing: border-box; 
 }
 
-
+h1 {
+  font-size: 4rem;
+  margin-bottom: 2rem;
+  .highlight-blue {
+    
+    border-bottom: 3px solid var(--highlight-color);
+    padding-bottom: 4px;
+}
+}
 
 
 /* --- Sección Hero --- */
@@ -28,8 +36,8 @@
   justify-content: center;
   
   h1 {
-    font-size: 3.5rem;
-    margin-bottom: 1rem;
+    font-size: 4.5rem;
+    margin-bottom: 2rem;
     .highlight-blue {
       
       border-bottom: 3px solid var(--highlight-color);
@@ -38,13 +46,14 @@
   }
   
   .subtitle {
-    font-size: 1.2rem;
+    font-size: 30px;
     color: #8b949e;
-    max-width: 600px;
+    max-width: 1000px;
     margin: 0 auto 30px auto;
   }
   
   .cta-buttons {
+    margin-top: 20px;
     margin-bottom: 50px;
     a {
       margin: 0 10px;
@@ -53,35 +62,13 @@
   
   .hero-image-container img {
     max-width: 100%;
-    width: 700px;
+    width: 1000px;
     border-radius: 8px;
-    border: 1px solid var(--border-color);
+    border: 2px solid var(--border-color);
   }
+
 }
 
-/* --- Pie de Página --- */
-.main-footer {
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 20px 0;
-  border-top: 1px solid var(--border-color);
-  
-  .copyright {
-    font-size: 0.9rem;
-    color: #8b949e;
-  }
-  
-  .social-media a {
-    color: #8b949e; 
-    margin-left: 15px;
-    font-size: 1.2rem;
-    transition: color 0.3s ease;
 
-    &:hover {
-      color: var(--text-color); 
-    }
-  }
-}
+
 
