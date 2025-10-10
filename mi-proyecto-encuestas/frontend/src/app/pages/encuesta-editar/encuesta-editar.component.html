@@ -2,21 +2,13 @@
 
 
   <main class="main-content">
-    <header class="content-header">
-    <button class="btn btn-back1" (click)="goBack()">
-      <i class="fas fa-arrow-left"></i>
-    </button>
-
-      <h1 class="app-title">Encuestas Dinamicas</h1>
-      <div class="header-actions">
-        <button type="button" (click)="toggleSettingsSidebar()" class="btn btn-secondary">
-          <i class="fas fa-cog"></i> Ajustes
-        </button>
-      </div>
-    </header>
-
+    
  <div class="editor-container">
   <main class="main-content">
+
+    <button type="button" (click)="toggleSettingsSidebar()" class="btn btn-secondary">
+          <i class="fas fa-cog"></i> Ajustes
+        </button>
     
     <div class="editor-body"> 
       <form [formGroup]="surveyForm" (ngSubmit)="onSubmit()" class="survey-editor">
