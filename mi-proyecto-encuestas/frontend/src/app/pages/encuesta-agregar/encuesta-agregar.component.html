@@ -7,13 +7,15 @@
  <div class="editor-container">
   <main class="main-content">
 
-     <button type="button" (click)="toggleSettingsSidebar()" class="btn btn-secondary">
-          <i class="fas fa-cog"></i> Ajustes
-          </button>
+       
     
     <div class="editor-body"> 
       <form [formGroup]="surveyForm" (ngSubmit)="onSubmit()" class="survey-editor">
         <input type="text" class="survey-title-input" placeholder="Escribe el título de tu encuesta..." formControlName="nombre">
+
+        <button type="button" (click)="toggleSettingsSidebar()" class="btn btn-secondary">
+          <i class="fas fa-cog"></i> Ajustes
+        </button>
 
         <div class="question-list" 
      formArrayName="preguntas"

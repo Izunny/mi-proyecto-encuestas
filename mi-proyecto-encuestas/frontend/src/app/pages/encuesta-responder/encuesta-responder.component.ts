@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, FormControl, FormArray } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { EncuestasService } from '../../services/encuestas.service';
+import { AuthService } from '../../services/auth.service';
 
 
 @Component({
@@ -12,6 +13,7 @@ import { EncuestasService } from '../../services/encuestas.service';
   templateUrl: './encuesta-responder.component.html',
   styleUrls: ['./encuesta-responder.component.scss']
 })
+
 export class EncuestaResponderComponent implements OnInit {
   survey: any = null;
   responseForm!: FormGroup;
@@ -22,7 +24,8 @@ export class EncuestaResponderComponent implements OnInit {
     private fb: FormBuilder,
     private encuestasService: EncuestasService,
     private route: ActivatedRoute,
-    private router: Router
+    private router: Router,
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
@@ -103,9 +106,8 @@ export class EncuestaResponderComponent implements OnInit {
       }
     }
 
-    const submissionData = {
+     const submissionData = {
       idencuesta: this.surveyId,
-      idusuario: 1,
       respuestas: processedRespuestas 
     };
 

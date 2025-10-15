@@ -1,4 +1,3 @@
-// src/app/services/auth.service.ts
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
@@ -8,7 +7,9 @@ import { Observable, BehaviorSubject, tap } from 'rxjs';
   providedIn: 'root'
 })
 export class AuthService {
-  private apiUrl = 'http://localhost:3000';
+  // CORRECCIÓN: URL base para las rutas de autenticación
+  private authApiUrl = 'http://localhost:3000/api/auth';
+
   private userSubject = new BehaviorSubject<any | null>(null);
   public user$ = this.userSubject.asObservable();
 
@@ -24,7 +25,8 @@ export class AuthService {
   }
 
   login(credentials: { username: string, password: string }): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/login`, credentials).pipe(
+    // CORRECCIÓN: Ahora llama a la ruta correcta .../api/auth/login
+    return this.http.post<any>(`${this.authApiUrl}/login`, credentials).pipe(
       tap(response => {
         if (response.token && response.user) {
           localStorage.setItem('token', response.token);
@@ -36,6 +38,9 @@ export class AuthService {
   }
 
   logout(): void {
+    // CORRECCIÓN: Llama a la ruta correcta .../api/auth/logout
+    this.http.post(`${this.authApiUrl}/logout`, {}).subscribe();
+    
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     this.userSubject.next(null);
@@ -53,4 +58,10 @@ export class AuthService {
   isLoggedIn(): boolean {
     return !!this.getToken();
   }
+
+    register(credentials: { username: string, password: string }): Observable<any> {
+    // Apunta a la nueva ruta estandarizada del backend
+    return this.http.post<any>(`${this.authApiUrl}/register`, credentials);
+  }
+
 }

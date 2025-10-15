@@ -6,40 +6,45 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class EncuestasService {
-  private apiUrl = 'http://localhost:3000/api';
+  private apiUrl = 'http://localhost:3000';
 
   constructor(private http: HttpClient) { }
 
-  logout(logout: any): Observable<any> {
-    return this.http.post(`http://localhost:3000/logout`, logout);
-  }
+  // --- MÉTODOS DEL DASHBOARD ---
 
-  // --- METODOS DEL DASHBOARD ---
+  getSurveysByUser(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/api/my-surveys`);
+  }
+  
   getAllSurveys(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/surveys`);
-  }
-  getSurveysByUser(userId: number | null): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/surveys/user/${userId}`);
-  }
-  updateSurveyStatus(surveyId: number, newStatus: string): Observable<any> {
-    return this.http.put(`${this.apiUrl}/surveys/${surveyId}/status`, { nuevoEstado: newStatus });
-  }
-  deleteSurvey(surveyId: number): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/surveys/${surveyId}`);
+    return this.http.get<any[]>(`${this.apiUrl}/api/surveys`);
   }
 
-  // --- METODOS DEL EDITOR DE ENCUESTAS ---
-  getSurveyById(id: number): Observable<any> {
-    return this.http.get(`${this.apiUrl}/surveys/user/${id}`);
+  updateSurveyStatus(surveyId: number, newStatus: string): Observable<any> {
+    return this.http.put(`${this.apiUrl}/api/surveys/${surveyId}/status`, { nuevoEstado: newStatus });
   }
+
+  deleteSurvey(surveyId: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/api/surveys/${surveyId}`);
+  }
+
+  // --- MÉTODOS DEL EDITOR Y RESPONDER ---
+
+ getSurveyById(id: number): Observable<any> {
+  return this.http.get(`${this.apiUrl}/api/surveys/${id}`);
+}
+
   createSurvey(surveyData: any): Observable<any> {
-    return this.http.post(`${this.apiUrl}/surveys`, surveyData);
+    return this.http.post(`${this.apiUrl}/api/surveys`, surveyData);
   }
+
   updateSurvey(id: number, surveyData: any): Observable<any> {
-    return this.http.put(`${this.apiUrl}/surveys/${id}`, surveyData);
+    return this.http.put(`${this.apiUrl}/api/surveys/${id}`, surveyData);
   }
 
   submitResponses(responseData: any): Observable<any> {
-    return this.http.post(`${this.apiUrl}/responses`, responseData);
+    return this.http.post(`${this.apiUrl}/api/responses`, responseData);
   }
+  
+ 
 }

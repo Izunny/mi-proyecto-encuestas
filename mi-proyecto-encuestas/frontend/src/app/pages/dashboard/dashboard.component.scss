@@ -114,42 +114,56 @@
   gap: 0.5rem; 
 }
 
-
-
 /* --- Tabla --- */
-
 .card-body {
-    padding: 10px;
-    border-radius: 8px;
-    border: 1px solid var(--border-color);
-    
-    p {
-      margin: 0;
-      font-size: 1rem;
-      color: var(--text-primary);
-    }
-  }
+  background-color: rgba(0, 0, 0, 0.486);
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+}
+
+.card-body p {
+  margin: 0;
+  font-size: 1rem;
+  color: var(--text-primary);
+}
 
 .table-hover {
   border: 1px solid var(--border-color);
   width: 100%;
   border-collapse: collapse;
-  margin-top: 20px;
   background-color: var(--bg-dark);
   color: var(--text-primary);
-
-    th, td {
-      padding: 12px 15px;
-      border-bottom: 1px solid var(--border-color);
-      text-align: left;
-    }
-
-    th {
-      background-color: var(--border-color);
-      font-weight: 600;
-    }
-    
 }
+
+.table-hover th,
+.table-hover td {
+  padding: 12px 15px;
+  border-bottom: 1px solid var(--border-color);
+  text-align: left;
+}
+
+.table-hover th {
+  background-color: var(--border-color);
+  font-weight: 600;
+}
+
+/*  Filas alternadas */
+.table-hover tbody tr:nth-child(odd) {
+  background-color: rgba(255, 255, 255, 0.03); /* color sutil para filas impares */
+}
+
+.table-hover tbody tr:nth-child(even) {
+  background-color: rgba(255, 255, 255, 0.07); /* color un poco más claro para pares */
+}
+
+/*  Efecto hover */
+.table-hover tbody tr:hover {
+  background-color:rgba(255, 248, 220, 0.185);
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
 
  .survey-title-input {
     background-color: transparent;
@@ -171,7 +185,7 @@
 .btn-sm {
   background: none !important;   
   border: none !important;       
-  color: purple !important;     
+  color: cornflowerblue !important;     
   text-decoration: none;         
   padding: 0;                   
   font-size: 1rem;              
@@ -179,6 +193,6 @@
 }
 
 .btn-sm:hover {
-  color: rgb(71, 6, 71) !important;   
+  color: blue !important;   
   text-decoration: underline;    
 }

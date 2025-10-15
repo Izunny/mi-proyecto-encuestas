@@ -1,9 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { EncuestasService } from '../../services/encuestas.service';
 import { AuthService } from '../../services/auth.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-dashboard',
@@ -12,40 +13,53 @@ import { AuthService } from '../../services/auth.service';
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss']
 })
-export class DashboardComponent implements OnInit {
+export class DashboardComponent implements OnInit, OnDestroy {
   surveys: any[] = [];
   filteredSurveys: any[] = [];
   selectedSurveyId: number | null = null;
   searchTerm: string = '';
-  viewMode: 'user' | 'all' = 'user'; 
-  currentUserId: number | null = null; 
+  viewMode: 'user' | 'all' = 'user';
+  
+  // 1. AÑADE Y INICIALIZA LA VARIABLE 'isLoading'
+  isLoading = true;
+
+  private userSubscription!: Subscription;
 
   constructor(
     private encuestasService: EncuestasService, 
     private authService: AuthService
   ) { }
 
-
   ngOnInit(): void {
-    const currentUser = this.authService.getCurrentUser();
-    if (currentUser) {
-      // Guardamos el ID en la variable de la clase para usarlo en otros métodos
-      this.currentUserId = currentUser.id;
+    this.userSubscription = this.authService.user$.subscribe(user => {
+      if (user) {
+        this.loadUserSurveys();
+      } else {
+        this.isLoading = false; // Si no hay usuario, dejamos de cargar
+        this.surveys = [];
+        this.filteredSurveys = [];
+      }
+    });
+  }
 
-      // LA CORRECCIÓN: Pasamos 'currentUser.id' directamente a la función.
-      // Así, TypeScript sabe sin lugar a dudas que le estamos pasando un número.
-      this.loadUserSurveys(currentUser.id); 
+  ngOnDestroy(): void {
+    if (this.userSubscription) {
+      this.userSubscription.unsubscribe();
     }
   }
 
-  logout(): void {
-    this.authService.logout();
-  }
-  
-  loadUserSurveys(userId: number): void {
-    this.encuestasService.getSurveysByUser(userId).subscribe((data: any[]) => {
-      this.surveys = data;
-      this.filterSurveys(); 
+  loadUserSurveys(): void {
+    this.isLoading = true; // 2. Ponlo en 'true' ANTES de iniciar la carga
+    this.encuestasService.getSurveysByUser().subscribe({
+      next: (data: any[]) => {
+        this.surveys = data;
+        this.filterSurveys(); 
+        this.isLoading = false; // 3. ¡PONLO EN 'false' AQUÍ AL TERMINAR!
+      },
+      error: (err) => {
+        console.error('Error al cargar las encuestas del usuario:', err);
+        this.isLoading = false; // 4. Y TAMBIÉN AQUÍ, EN CASO DE ERROR
+      }
     });
   }
 
@@ -56,26 +70,29 @@ export class DashboardComponent implements OnInit {
     });
   }
 
-toggleView(): void {
-  this.viewMode = this.viewMode === 'user' ? 'all' : 'user';
-  if (this.viewMode === 'user') {
-    if (this.currentUserId) {
-      this.loadUserSurveys(this.currentUserId);
-    }
-  } else {
-    this.loadAllSurveys();
-  }
-}
-
-  filterSurveys(): void {
-    if (!this.searchTerm) {
-      this.filteredSurveys = this.surveys;
+  toggleView(): void {
+    this.viewMode = this.viewMode === 'user' ? 'all' : 'user';
+    if (this.viewMode === 'user') {
+      this.loadUserSurveys();
     } else {
-      this.filteredSurveys = this.surveys.filter(survey =>
-        survey.nombre.toLowerCase().includes(this.searchTerm.toLowerCase())
-      );
+      this.loadAllSurveys();
     }
   }
+
+  // --- El resto de tus métodos (filterSurveys, changeStatus, etc.) no necesitan cambios ---
+  
+filterSurveys(): void {
+  console.log('3. [filterSurveys] Filtrando las encuestas...');
+  if (!this.searchTerm) {
+    this.filteredSurveys = this.surveys;
+  } else {
+    this.filteredSurveys = this.surveys.filter(survey =>
+      survey.nombre.toLowerCase().includes(this.searchTerm.toLowerCase())
+    );
+  }
+  // ESTE ES EL MENSAJE MÁS IMPORTANTE:
+  console.log('4. [filterSurveys] El arreglo final para mostrar en la tabla es:', this.filteredSurveys);
+}
 
   changeStatus(survey: any): void {
     const nuevoEstado = survey.activo === 'S' ? 'N' : 'S';
@@ -114,10 +131,8 @@ toggleView(): void {
       this.encuestasService.deleteSurvey(this.selectedSurveyId).subscribe({
         next: () => {
           alert('Encuesta eliminada con éxito.');
-          // CORRECCIÓN AQUÍ: Pasa el ID del usuario si es necesario
-          if (this.currentUserId) {
-            this.loadUserSurveys(this.currentUserId);
-
+          if (this.viewMode === 'user') {
+            this.loadUserSurveys();
           } else {
             this.loadAllSurveys();
           }
@@ -129,5 +144,9 @@ toggleView(): void {
         }
       });
     }
+  }
+
+  logout(): void {
+    this.authService.logout();
   }
 }

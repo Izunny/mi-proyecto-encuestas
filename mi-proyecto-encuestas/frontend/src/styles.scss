@@ -1,90 +1,91 @@
-/* src/styles.scss */
-
-// globales
+/* === Variables Globales === */
 :root {
-
---bg-color: #0F172A;
---text-color: #ffffff;
---card-bg: #161b22;
---primary-color: #1f50c0; 
---primary-color-hover: #7bd5ee;
---border-color: #163d97; 
---highlight-color: #0c778c; 
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  --bg-color: #0F172A;
+  --text-color: #ffffff;
+  --card-bg: #161b22;
+  --primary-color: #1f50c0;
+  --primary-color-hover: #7bd5ee;
+  --border-color: #163d97;
+  --highlight-color: #0c778c;
+  --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-// Estilos base del body
+/* === Body === */
 body {
   background-color: var(--bg-color);
   background-image: url("/assets/images/shiny.svg");
   background-repeat: no-repeat;
-background-position: center;
-  background-size: cover; /* Optional: Adjusts how the image covers the element */
+  background-position: center;
+  background-size: cover;
   color: var(--text-color);
   font-family: var(--font-family);
   margin: 0;
 }
 
+/* === Enlaces === */
 a {
   font-weight: bold;
 }
 
-// Estilos de botones reutilizables
+/* === Botones Reutilizables === */
 .btn {
   padding: 10px 20px;
   border-radius: 6px;
   text-decoration: none;
   font-weight: 600;
   transition: all 0.3s ease;
-  cursor: pointer; 
+  cursor: pointer;
 }
 
+/* --- Botón primario --- */
 .btn-primary {
   background-color: var(--primary-color);
   color: #fff;
   border: 1px solid var(--primary-color);
-
-  &:hover {
-    background-color: var(--primary-color-hover); 
-    transform: translateY(-2px); 
-  }
 }
 
+.btn-primary:hover {
+  background-color: var(--primary-color-hover);
+  transform: translateY(-2px);
+}
+
+/* --- Botón secundario --- */
 .btn-secondary {
   background-color: transparent;
   color: var(--text-color);
   border: 1px solid var(--border-color);
-  
-  &:hover {
-    background-color: var(--border-color);
-    color: #fff;
-  }
 }
 
-// Header utilizado en las paginas de inicio
-/* --- Cabecera y Navegación --- */
+.btn-secondary:hover {
+  background-color: var(--border-color);
+  color: #fff;
+}
+
+/* === Cabecera y Navegación === */
 .main-header {
-    width: 1000px;
-    height: 100px;
-    background: #02002470;
-    margin: 20px auto;   
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    border-radius: 20px;
+  width: 1000px;
+  height: 100px;
+  background: #02002470;
+  margin: 20px auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-radius: 20px;
 }
 
+/* --- Logo --- */
 .img-logo {
-    width: 50px;
-    margin-top: 10px;
-    padding: 0px 25px 0px 0px;
+  width: 50px;
+  margin-top: 10px;
+  padding: 0px 25px 0px 0px;
 }
 
 .logo {
-    font-weight: bold;
-    font-size: 1.5rem;
+  font-weight: bold;
+  font-size: 1.5rem;
 }
 
+/* --- Cabecera izquierda --- */
 .header-left {
   display: flex;
   align-items: center;
@@ -92,20 +93,18 @@ a {
   margin-left: 50px;
 }
 
+/* --- Navegación principal --- */
 .main-nav {
   margin-right: 50px;
 }
 
 .main-nav a {
-    color: var(--text-color);
-    text-decoration: none;
-    margin-left: 20px;
-    transition: color 0.3s ease;
-    
-    &:hover {
-    color: var(--highlight-color);
-    }
+  color: var(--text-color);
+  text-decoration: none;
+  margin-left: 20px;
+  transition: color 0.3s ease;
 }
 
-
-
+.main-nav a:hover {
+  color: var(--highlight-color);
+}
