@@ -477,3 +477,123 @@ app.delete('/api/surveys/:id', verifyToken, async (req, res) => {
     if (connection) connection.release();
   }
 });
+
+app.get('/results3/:id', async (req, res) => {
+  const { id } = req.params;
+  const connection = await db.getConnection();
+
+  try {
+    const query = 'SELECT * FROM enc_encuestasm WHERE idencuesta = ?';
+    const [result] = await connection.query(query, [id]);
+
+    res.json(result);
+
+  } catch (err) {
+    console.error(`Error al eliminar la encuesta ${id}:`, err);
+    res.status(500).json({ error: 'Error interno del servidor.' });
+  } finally {
+    connection.release();
+  }
+});
+
+app.get('/results3/:id', async (req, res) => {
+  const { id } = req.params;
+  const connection = await db.getConnection();
+
+  try {
+
+    // Nombre de cada pregunta
+    const texto_preguntas = `SELECT textopregunta, idtipopregunta FROM enc_pregunta WHERE idencuesta = ?`;
+    const result = await connection.query(texto_preguntas, [id]);
+    
+    // Numero de preguntas
+    const numpreguntas = Object.keys(result2[0]).length;
+    
+    /* 
+    Tipos de pregunta
+      1 -> texto corto 
+      2 -> parrafo
+      3 -> opcion unica
+      4 -> opcion multiple
+      5 -> slider
+      6 -> ranking 
+      */
+    
+      
+    res.json(result);
+    
+  } catch (err) {
+    res.status(500).json({ error: 'Error interno del servidor.' });
+  } finally {
+    connection.release();
+  }
+});
+
+// OBTENER UNA ENCUESTA ESPECÍFICA (VERSIÓN CON DEPURACIÓN AVANZADA)
+app.get('/results/:id', verifyToken, async (req, res) => {
+  const { id } = req.params;
+  const userId = req.user.id;
+  
+  // Mensaje 1: ¿Llega la petición y con qué datos?
+  console.log(`--- PASO 1: Petición recibida para encuesta ID: ${id} (tipo: ${typeof id})`);
+  
+  // Mensaje 2: ¿Qué usuario está verificado?
+  console.log(`--- PASO 2: Usuario verificado con ID: ${userId} (tipo: ${typeof userId})`);
+
+  let connection;
+  try {
+    // Mensaje 3: ¿Podemos obtener una conexión a la BD?
+    console.log('--- PASO 3: Intentando obtener conexión a la BD...');
+    connection = await db.getConnection();
+    console.log('--- PASO 4: Conexión obtenida. Ejecutando consulta de verificación...');
+
+    // 1. VERIFICAMOS QUE LA ENCUESTA EXISTA Y PERTENEZCA AL USUARIO
+    const query = 'SELECT * FROM enc_encuestasm WHERE idencuesta = ? AND idusuario = ?';
+    // Mensaje 5: ¿Cuál es la consulta exacta que se está ejecutando?
+    console.log('--- PASO 5: La consulta SQL es:', query, 'con valores:', [id, userId]);
+
+    const [surveyRows] = await connection.query(query, [id, userId]);
+    
+    // Mensaje 6: ¿Qué devolvió la base de datos?
+    console.log('--- PASO 6: Resultado de la consulta de verificación:', surveyRows);
+
+    if (surveyRows.length === 0) {
+      console.log('--- PASO 7: La encuesta no pertenece al usuario o no existe. Devolviendo 404.');
+      connection.release();
+      return res.status(404).json({ error: 'Encuesta no encontrada o no tienes permiso para verla.' });
+    }
+    
+    console.log('--- PASO 8: Encuesta encontrada. Obteniendo preguntas...');
+    const encuesta = surveyRows[0];
+
+    // 2. OBTENEMOS LAS PREGUNTAS Y OPCIONES
+    const [questions] = await connection.query(
+      'SELECT * FROM enc_pregunta WHERE idencuesta = ? ORDER BY orden ASC',
+      [id]
+    );
+    
+    for (const pregunta of questions) {
+      if (pregunta.idtipopregunta === 3 || pregunta.idtipopregunta === 4) {
+        const [options] = await connection.query('SELECT * FROM enc_opcion WHERE idpregunta = ?', [pregunta.idpregunta]);
+        pregunta.opciones = options;
+      } else {
+        pregunta.opciones = [];
+      }
+      pregunta.requerida = pregunta.requerida === 'S';
+    }
+
+    encuesta.preguntas = questions;
+    console.log('--- PASO 9: Enviando respuesta final al frontend.');
+    res.json(encuesta);
+
+  } catch (err) {
+    // Si algo falla, este mensaje nos dirá qué fue
+    console.error('--- ¡ERROR FATAL EN EL BLOQUE CATCH! ---', err);
+    res.status(500).json({ error: 'Error interno del servidor.' });
+  } finally {
+    if (connection) {
+      console.log('--- PASO 10: Liberando la conexión a la BD.');
+      connection.release();
+    }
+  }
+});

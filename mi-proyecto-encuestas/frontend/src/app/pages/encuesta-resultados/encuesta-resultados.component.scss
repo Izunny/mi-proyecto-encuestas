@@ -1,0 +1,30 @@
+
+.survey-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: start;
+    margin: 0px 100px 20px 100px;
+    background-color: rgba(13, 20, 36);
+    padding: 0px 25px 20px 25px;
+    border-color: grey;
+    border-style: solid;
+    border-width: 1px;
+}
+
+.results-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: start;
+    margin: 0px 100px 20px 100px;
+    padding: 0px 25px 20px 25px;
+    background-color: rgba(15, 26, 51);
+    border-color: grey;
+    border-style: solid;
+    border-width: 1px;
+}
+
+p {
+    font-size: 20px;
+}
+
+

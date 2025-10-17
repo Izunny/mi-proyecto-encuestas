@@ -1,1 +1,14 @@
-<p>encuesta-resultados works!</p>
+<div class="survey-container"> 
+    <div class="survey-header">
+      <h1>{{ survey.nombre }}</h1>
+      <p>{{ survey.descripcion }}</p>
+      <p>Fecha: {{ fecha_formato }}</p>
+    </div>
+</div>
+
+<div class="results-container">
+  <div *ngFor="let pregunta of survey.preguntas; let i = index">
+      <h2>{{ i + 1 }}. {{ pregunta.textopregunta }}</h2>  
+      <hr>          
+  </div>
+</div>

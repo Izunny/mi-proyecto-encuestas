@@ -46,5 +46,8 @@ export class EncuestasService {
     return this.http.post(`${this.apiUrl}/api/responses`, responseData);
   }
   
- 
+  // --- MÉTODOS DE RESULTADOS ---
+  getQuestionsBySurvey(id: number): Observable<any> {
+    return this.http.get(`${this.apiUrl}/results/${id}`);
+  }
 }
