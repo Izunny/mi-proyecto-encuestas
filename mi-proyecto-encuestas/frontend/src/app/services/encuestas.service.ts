@@ -50,4 +50,9 @@ export class EncuestasService {
   getQuestionsBySurvey(id: number): Observable<any> {
     return this.http.get(`${this.apiUrl}/results/${id}`);
   }
+
+  getResults(id: number): Observable<any> {
+    return this.http.get(`${this.apiUrl}/results/${id}`);
+  }
+
 }
