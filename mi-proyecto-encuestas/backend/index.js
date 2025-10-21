@@ -572,7 +572,27 @@ app.get('/results/:id', verifyToken, async (req, res) => {
 
       } else {
         // Preguntas tipo Slider o Rating
-        resultadosFinales[i] = "Tipo 5 o 6";
+        if (encuesta.preguntas[i].idtipopregunta === 5) {
+        let resultadosSlider = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        for (let y = 0; y < encuesta.preguntas[i].respuestas.length; y++) {
+          resultadosSlider[Number(encuesta.preguntas[i].respuestas[y].respuesta)] += 1;
+        }
+          resultadosFinales[i] = [
+            [encuesta.preguntas[i].textopregunta, encuesta.preguntas[i].idtipopregunta],
+            [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+            resultadosSlider,
+          ] 
+        } else if (encuesta.preguntas[i].idtipopregunta === 6) {
+          let resultadosRanking = [0, 0, 0, 0, 0]
+          for (let y = 0; y < encuesta.preguntas[i].respuestas.length; y++) {
+            resultadosRanking[Number(encuesta.preguntas[i].respuestas[y].respuesta)] += 1;
+          }
+          resultadosFinales[i] = [
+            [encuesta.preguntas[i].textopregunta, encuesta.preguntas[i].idtipopregunta],
+            [0, 1, 2, 3, 4, 5],
+            resultadosRanking
+          ] 
+        }
       }
     }
 
