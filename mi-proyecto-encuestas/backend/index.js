@@ -4,7 +4,8 @@ const cors = require('cors');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
-
+const PDFDocument = require('pdfkit');
+const fs = require('fs');
 const app = express();
 
 // --- CONFIGURACIÓN Y MIDDLEWARES ---
@@ -573,7 +574,7 @@ app.get('/results/:id', verifyToken, async (req, res) => {
       } else {
         // Preguntas tipo Slider o Rating
         if (encuesta.preguntas[i].idtipopregunta === 5) {
-        let resultadosSlider = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        let resultadosSlider = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         for (let y = 0; y < encuesta.preguntas[i].respuestas.length; y++) {
           resultadosSlider[Number(encuesta.preguntas[i].respuestas[y].respuesta)] += 1;
         }
@@ -589,7 +590,7 @@ app.get('/results/:id', verifyToken, async (req, res) => {
           }
           resultadosFinales[i] = [
             [encuesta.preguntas[i].textopregunta, encuesta.preguntas[i].idtipopregunta],
-            [0, 1, 2, 3, 4, 5],
+            [1, 2, 3, 4, 5],
             resultadosRanking
           ] 
         }
