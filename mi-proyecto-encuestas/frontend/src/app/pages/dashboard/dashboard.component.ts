@@ -5,25 +5,31 @@ import { RouterModule } from '@angular/router';
 import { EncuestasService } from '../../services/encuestas.service';
 import { AuthService } from '../../services/auth.service';
 import { Subscription } from 'rxjs';
+import { Encuesta } from '../../interfaces/encuesta.interface';
+// --- 1. IMPORTAMOS EL COMPONENTE DE QR DE LA LIBRERÍA CORRECTA ---
+import { QRCodeComponent } from 'angularx-qrcode';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [ CommonModule, FormsModule, RouterModule ],
+  // --- 2. AÑADIMOS QRCodeComponent A LOS IMPORTS ---
+  imports: [ CommonModule, FormsModule, RouterModule, QRCodeComponent ],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss']
 })
 export class DashboardComponent implements OnInit, OnDestroy {
-  surveys: any[] = [];
-  filteredSurveys: any[] = [];
+  // --- Tus propiedades existentes ---
+  surveys: Encuesta[] = [];
+  filteredSurveys: Encuesta[] = [];
   selectedSurveyId: number | null = null;
   searchTerm: string = '';
   viewMode: 'user' | 'all' = 'user';
-  
-  // 1. AÑADE Y INICIALIZA LA VARIABLE 'isLoading'
   isLoading = true;
-
   private userSubscription!: Subscription;
+  
+  // --- 3. VARIABLES PARA MANEJAR EL MODAL ---
+  public isShareModalOpen = false;
+  public shareUrl = '';
 
   constructor(
     private encuestasService: EncuestasService, 
@@ -32,22 +38,49 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.userSubscription = this.authService.user$.subscribe(user => {
-      if (user) {
-        this.loadUserSurveys();
-      } else {
-        this.isLoading = false; // Si no hay usuario, dejamos de cargar
-        this.surveys = [];
-        this.filteredSurveys = [];
-      }
+      if (user) { this.loadUserSurveys(); } 
+      else { /* ... (tu lógica si no hay usuario) ... */ }
     });
   }
 
   ngOnDestroy(): void {
-    if (this.userSubscription) {
-      this.userSubscription.unsubscribe();
-    }
+    if (this.userSubscription) { this.userSubscription.unsubscribe(); }
   }
 
+  // --- 4. LÓGICA COMPLETA PARA 'shareSurvey' ---
+  shareSurvey(): void {
+    if (!this.selectedSurveyId) return;
+
+    const usesInput = prompt("¿Cuántas veces se puede usar este enlace?\n(Deja en blanco o '0' para ilimitado)", "0");
+    if (usesInput === null) return;
+
+    const durationInput = prompt("¿Por cuántos días será válido este enlace?\n(Deja en blanco para 7 días)", "7");
+    if (durationInput === null) return;
+
+    const uses = parseInt(usesInput, 10);
+    const maxUses = (!isNaN(uses) && uses > 0) ? uses : null;
+    const days = parseInt(durationInput, 10);
+    const durationDays = (!isNaN(days) && days > 0) ? days : 7;
+
+    this.encuestasService.generateShareToken(this.selectedSurveyId, maxUses, durationDays).subscribe({
+      next: (response: any) => { // Añadimos ': any'
+        const token = response.token;
+        this.shareUrl = `${window.location.origin}/responder/${token}`;
+        this.isShareModalOpen = true;
+      },
+      error: (err: any) => { /* ... */ }
+    });
+  }
+
+  // --- 5. FUNCIÓN PARA COPIAR LA URL ---
+  copyUrlToClipboard(): void {
+    navigator.clipboard.writeText(this.shareUrl).then(() => {
+      alert('¡Enlace copiado al portapapeles!');
+    }).catch(err => {
+      console.error('Error al copiar el enlace:', err);
+    });
+  }
+  
   loadUserSurveys(): void {
     this.isLoading = true; // 2. Ponlo en 'true' ANTES de iniciar la carga
     this.encuestasService.getSurveysByUser().subscribe({

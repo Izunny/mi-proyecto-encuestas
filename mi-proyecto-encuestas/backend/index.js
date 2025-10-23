@@ -7,6 +7,7 @@ const cookieParser = require('cookie-parser');
 const PDFDocument = require('pdfkit');
 const fs = require('fs');
 const app = express();
+const crypto = require('crypto');
 
 // --- CONFIGURACIÓN Y MIDDLEWARES ---
 
@@ -105,39 +106,45 @@ app.post('/api/auth/logout', (req, res) => {
   res.json({ message: 'Logout exitoso.' });
 });
 
-app.post('/logout', (req, res) => {
+app.post('/api/logout', (req, res) => {
   res
     .clearCookie('access_token')
     .json({message: 'Logout succesfully'})
 })
 
 // READ
-app.get('/usuarios', (req, res) => {
-  db.query('SELECT * FROM usuarios', (err, result) => {
-    if (err) return res.json(err);
+app.get('/api/usuarios', async (req, res) => {
+  try {
+    const [result] = await db.query('SELECT idusuario, username, nombreU FROM usuarios');
     res.json(result);
-  });
+  } catch (err) {
+    console.error("Error al obtener usuarios:", err);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
 });
 
-// UPDATE
-app.put('/usuarios/:id', (req, res) => {
-  const { id } = req.params;
-  const { nombre, email } = req.body;
-  db.query('UPDATE usuarios SET nombre = ?, email = ? WHERE id = ?', [nombre, email, id], (err, result) => {
-    if (err) return res.json(err);
-    res.json(result);
-  });
+app.put('/api/usuarios/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { nombre, email } = req.body;
+    await db.query('UPDATE usuarios SET nombre = ?, email = ? WHERE idusuario = ?', [nombre, email, id]);
+    res.json({ message: "Usuario actualizado" });
+  } catch (err) {
+    console.error("Error al actualizar usuario:", err);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
 });
 
-// DELETE
-app.delete('/usuarios/:id', (req, res) => {
-  const { id } = req.params;
-  db.query('DELETE FROM usuarios WHERE id = ?', [id], (err, result) => {
-    if (err) return res.json(err);
-    res.json(result);
-  });
+app.delete('/api/usuarios/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    await db.query('DELETE FROM usuarios WHERE idusuario = ?', [id]);
+    res.json({ message: "Usuario eliminado" });
+  } catch (err) {
+    console.error("Error al eliminar usuario:", err);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
 });
-
 
 // OBTENER TODAS LAS ENCUESTAS 
 app.get('/api/surveys', async (req, res) => {
@@ -375,64 +382,64 @@ app.put('/api/surveys/:id', verifyToken, async (req, res) => {
 });
 
 // GUARDAR LAS RESPUESTAS DE UNA ENCUESTA (VERSIÓN SEGURA)
-app.post('/api/responses', verifyToken, async (req, res) => {
-  // 1. Ya no tomamos el idusuario del body, sino del token.
-  const { idencuesta, respuestas } = req.body;
-  const idusuario = req.user.id; // <-- Obtenemos el idusuario del token verificado
+app.post('/api/responses', async (req, res) => {
+  // 2. Leemos 'token', 'idusuario' y 'respuestas' del body
+  const { token, idusuario, respuestas } = req.body;
 
-  // 2. La validación ahora es más simple.
-  if (!idencuesta || !respuestas) {
+  if (!token || !idusuario || !respuestas) {
     return res.status(400).json({ error: 'Faltan datos para guardar la respuesta.' });
   }
 
-  const connection = await db.getConnection();
-
+  let connection;
   try {
+    connection = await db.getConnection();
     await connection.beginTransaction();
 
-    // 3. La consulta INSERT sigue siendo la misma, pero ahora usa el 'idusuario' seguro del token.
+    // 3. Validamos el token (es nuestra nueva seguridad)
+    const validationQuery = `
+      SELECT idencuesta 
+      FROM enc_tokens 
+      WHERE token = ? AND expira > NOW() AND (usos_actuales < usos_maximos OR usos_maximos IS NULL)
+      LIMIT 1 FOR UPDATE
+    `;
+    const [tokenRows] = await connection.query(validationQuery, [token]);
+    if (tokenRows.length === 0) {
+      throw new Error('Token inválido, expirado o ha alcanzado su límite de usos.');
+    }
+    const { idencuesta } = tokenRows[0];
+
+    // 4. Si el token es válido, guardamos la respuesta
     const responseQuery = 'INSERT INTO enc_respuesta (idencuesta, idusuario, fecha) VALUES (?, ?, NOW())';
     const [responseResult] = await connection.query(responseQuery, [idencuesta, idusuario]);
     const newResponseId = responseResult.insertId;
 
-    // --- El resto de tu lógica para guardar las respuestas (que ya estaba bien) no cambia ---
+    // 5. Guardamos cada respuesta individual (tu lógica estaba bien)
     for (const idpregunta of Object.keys(respuestas)) {
       const respuesta = respuestas[idpregunta];
-
       if (respuesta == null || respuesta === '') continue;
-
+      
       if (Array.isArray(respuesta)) {
-        // OPCION MULTIPLE
         for (const idopcion of respuesta) {
-          await connection.query(
-            'INSERT INTO enc_respuestaopcion (idopciones, idrespuestas, idpregunta) VALUES (?, ?, ?)',
-            [idopcion, newResponseId, idpregunta]
-          );
+          await connection.query('INSERT INTO enc_respuestaopcion (idopciones, idrespuestas, idpregunta) VALUES (?, ?, ?)', [idopcion, newResponseId, idpregunta]);
         }
       } else if (typeof respuesta === 'number') {
-        // OPCION UNICA 
-        await connection.query(
-          'INSERT INTO enc_respuestaopcion (idopciones, idrespuestas, idpregunta) VALUES (?, ?, ?)',
-          [respuesta, newResponseId, idpregunta]
-        );
+        await connection.query('INSERT INTO enc_respuestaopcion (idopciones, idrespuestas, idpregunta) VALUES (?, ?, ?)', [respuesta, newResponseId, idpregunta]);
       } else {
-        // TEXTO
-        await connection.query(
-          'INSERT INTO enc_respuestatexto (respuesta, idrespuestas, idpregunta) VALUES (?, ?, ?)',
-          [respuesta.toString(), newResponseId, idpregunta]
-        );
+        await connection.query('INSERT INTO enc_respuestatexto (respuesta, idrespuestas, idpregunta) VALUES (?, ?, ?)', [respuesta.toString(), newResponseId, idpregunta]);
       }
     }
 
+    // 6. Incrementamos el contador de usos del token
+    await connection.query('UPDATE enc_tokens SET usos_actuales = usos_actuales + 1 WHERE token = ?', [token]);
+
     await connection.commit();
     res.status(201).json({ message: '¡Gracias por tus respuestas!' });
-
   } catch (err) {
-    await connection.rollback();
+    if (connection) await connection.rollback();
     console.error('Error al guardar las respuestas:', err);
-    res.status(500).json({ error: 'Error interno del servidor al guardar las respuestas.' });
+    res.status(500).json({ error: err.message || 'Error interno del servidor.' });
   } finally {
-    connection.release();
+    if (connection) connection.release();
   }
 });
 
@@ -481,7 +488,7 @@ app.delete('/api/surveys/:id', verifyToken, async (req, res) => {
 
 
 // OBTENER UNA ENCUESTA ESPECÍFICA (VERSIÓN CON DEPURACIÓN AVANZADA)
-app.get('/results/:id', verifyToken, async (req, res) => {
+app.get('/api/results/:id', verifyToken, async (req, res) => {
   const { id } = req.params;  
   const userId = req.user.id;
 
@@ -590,7 +597,7 @@ app.get('/results/:id', verifyToken, async (req, res) => {
           }
           resultadosFinales[i] = [
             [encuesta.preguntas[i].textopregunta, encuesta.preguntas[i].idtipopregunta],
-            [1, 2, 3, 4, 5],
+            [0, 1, 2, 3, 4, 5],
             resultadosRanking
           ] 
         }
@@ -610,5 +617,67 @@ app.get('/results/:id', verifyToken, async (req, res) => {
       console.log('--- PASO 10: Liberando la conexión a la BD.');
       connection.release();
     }
+  }
+});
+
+// --- RUTAS DE TOKENS Y RESPUESTAS ---
+app.post('/api/surveys/:id/share', async (req, res) => {
+  const { id: idencuesta } = req.params;
+  const { maxUses, durationDays } = req.body;
+  try {
+    const token = crypto.randomBytes(16).toString('hex'); // Esta línea ahora funcionará
+    const expira = new Date();
+    expira.setDate(expira.getDate() + (durationDays || 7));
+    const query = 'INSERT INTO enc_tokens (idencuesta, token, expira, usos_maximos) VALUES (?, ?, ?, ?)';
+    await db.query(query, [idencuesta, token, expira, maxUses]);
+    res.json({ token });
+  } catch (err) {
+    console.error(`Error al generar token:`, err);
+    res.status(500).json({ error: 'Error interno del servidor.' });
+  }
+});
+
+// --- 👆👆 FIN: NUEVA RUTA 👆👆 ---
+
+
+// --- OBTENER ENCUESTA POR TOKEN (PARA LA PÁGINA DE RESPONDER) ---
+// (Asegúrate de que esta ruta también exista y use /api)
+app.get('/api/survey-by-token/:token', async (req, res) => {
+  const { token } = req.params;
+  try {
+    const query = `
+      SELECT idencuesta 
+      FROM enc_tokens 
+      WHERE token = ? AND expira > NOW() AND (usos_actuales < usos_maximos OR usos_maximos IS NULL)
+      LIMIT 1
+    `;
+    const [tokenRows] = await db.query(query, [token]);
+
+    if (tokenRows.length === 0) {
+      return res.status(404).json({ error: 'Enlace no válido, ha expirado o ha alcanzado su límite de usos.' });
+    }
+    
+    // Si el token es válido, obtenemos los datos de la encuesta
+    const { idencuesta } = tokenRows[0];
+    const [surveyRows] = await db.query('SELECT nombre, descripcion FROM enc_encuestasm WHERE idencuesta = ?', [idencuesta]);
+    if (surveyRows.length === 0) {
+        return res.status(404).json({ error: 'La encuesta asociada a este enlace ya no existe.' });
+    }
+    
+    const encuesta = surveyRows[0];
+    const [questions] = await db.query('SELECT idpregunta, textopregunta, requerida, idtipopregunta FROM enc_pregunta WHERE idencuesta = ? ORDER BY orden ASC', [idencuesta]);
+    
+    for (const pregunta of questions) {
+      if (pregunta.idtipopregunta === 3 || pregunta.idtipopregunta === 4) {
+        const [options] = await db.query('SELECT idopciones, opcion FROM enc_opcion WHERE idpregunta = ?', [pregunta.idpregunta]);
+        pregunta.opciones = options;
+      }
+    }
+    encuesta.preguntas = questions;
+    res.json(encuesta);
+
+  } catch (err) {
+    console.error(`Error al obtener encuesta con token ${token}:`, err);
+    res.status(500).json({ error: 'Error interno del servidor.' });
   }
 });

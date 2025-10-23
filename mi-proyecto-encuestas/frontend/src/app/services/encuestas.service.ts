@@ -6,12 +6,13 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class EncuestasService {
+  // 1. Dejamos la URL base como estaba, sin /api
   private apiUrl = 'http://localhost:3000';
 
   constructor(private http: HttpClient) { }
 
   // --- MÉTODOS DEL DASHBOARD ---
-
+  // 2. Añadimos /api a todas las rutas que SÍ lo usan
   getSurveysByUser(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/api/my-surveys`);
   }
@@ -29,10 +30,9 @@ export class EncuestasService {
   }
 
   // --- MÉTODOS DEL EDITOR Y RESPONDER ---
-
- getSurveyById(id: number): Observable<any> {
-  return this.http.get(`${this.apiUrl}/api/surveys/${id}`);
-}
+  getSurveyById(id: number): Observable<any> {
+    return this.http.get(`${this.apiUrl}/api/surveys/${id}`);
+  }
 
   createSurvey(surveyData: any): Observable<any> {
     return this.http.post(`${this.apiUrl}/api/surveys`, surveyData);
@@ -46,13 +46,19 @@ export class EncuestasService {
     return this.http.post(`${this.apiUrl}/api/responses`, responseData);
   }
   
-  // --- MÉTODOS DE RESULTADOS ---
-  getQuestionsBySurvey(id: number): Observable<any> {
-    return this.http.get(`${this.apiUrl}/results/${id}`);
+  // --- MÉTODOS DE COMPARTIR Y RESULTADOS ---
+
+  // 3. Añadimos /api a la ruta de COMPARTIR (esta era la que fallaba)
+  generateShareToken(surveyId: number, maxUses: number | null, durationDays: number | null): Observable<{ token: string }> {
+    return this.http.post<{ token: string }>(`${this.apiUrl}/api/surveys/${surveyId}/share`, { maxUses, durationDays });
   }
 
-  getResults(id: number): Observable<any> {
-    return this.http.get(`${this.apiUrl}/results/${id}`);
+  // 4. Dejamos la ruta de RESULTADOS SIN /api, tal como la tiene tu compañero
+  getResults(surveyId: number): Observable<any> {
+    return this.http.get(`${this.apiUrl}/api/results/${surveyId}`);
   }
-
+  
+  getSurveyByToken(token: string): Observable<any> {
+    return this.http.get(`${this.apiUrl}/api/survey-by-token/${token}`);
+  }
 }

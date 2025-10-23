@@ -11,8 +11,7 @@
           [class.disabled]="!selectedSurveyId" 
           [routerLink]="['/encuesta/resultados', selectedSurveyId]">Ver Resultados</a>
 
-        <a class="btn btn-light" 
-          [routerLink]="['/encuesta/responder', selectedSurveyId]">Compartir Encuesta</a>
+        <a class="btn btn-light" [class.disabled]="!selectedSurveyId" (click)="shareSurvey()">Compartir Encuesta</a>
 
         <a class="btn btn-light" 
           [class.disabled]="!selectedSurveyId" 
@@ -79,4 +78,27 @@
 
   </div>
   </main>
+</div>
+
+<div *ngIf="isShareModalOpen" class="modal-overlay" (click)="isShareModalOpen = false">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Comparte tu Encuesta</h2>
+      <button class="close-btn" (click)="isShareModalOpen = false">&times;</button>
+    </div>
+    <div class="modal-body">
+      <p>Cualquier persona con este enlace podrá responder tu encuesta.</p>
+      
+      <div class="share-link-container">
+        <input type="text" readonly [value]="shareUrl">
+        <button (click)="copyUrlToClipboard()">Copiar</button>
+      </div>
+
+      <div class="qr-code-container">
+        <!-- 👇 La etiqueta y propiedad correctas para 'angularx-qrcode' 👇 -->
+        <qrcode [qrdata]="shareUrl" [width]="200"></qrcode>
+        <p>O escanea el código QR</p>
+      </div>
+    </div>
+  </div>
 </div>
