@@ -130,6 +130,8 @@ CREATE TABLE `enc_tokens` (
   `idencuesta` int(11) NOT NULL,
   `token` varchar(32) NOT NULL,
   `expira` datetime NOT NULL,
+  `usos_maximos` int(11) DEFAULT NULL,
+  `usos_actuales` int(11) NOT NULL DEFAULT 0,
   `utilizado` tinyint(1) DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
