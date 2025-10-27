@@ -49,7 +49,7 @@
 
               <ng-container *ngSwitchCase="5">
               <div class="slider-container">
-                <input type="range" min="0" max="10" step="1" [formControlName]="pregunta.idpregunta" class="form-slider">
+                <input type="range" min="1" max="10" step="1" [formControlName]="pregunta.idpregunta" class="form-slider">
                 <span class="slider-value">{{ responseForm.get('respuestas.' + pregunta.idpregunta)?.value || 0 }}</span>
               </div>
             </ng-container>

@@ -61,4 +61,9 @@ export class EncuestasService {
   getSurveyByToken(token: string): Observable<any> {
     return this.http.get(`${this.apiUrl}/api/survey-by-token/${token}`);
   }
+
+  // Generar PDF
+  getPDF(surveyId: number): Observable<any> {
+    return this.http.get(`${this.apiUrl}/api/pdf/${surveyId}`, { responseType: 'blob' });
+  }
 }

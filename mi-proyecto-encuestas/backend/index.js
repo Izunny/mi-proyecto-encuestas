@@ -8,6 +8,10 @@ const PDFDocument = require('pdfkit');
 const fs = require('fs');
 const app = express();
 const crypto = require('crypto');
+const path = require('path');
+const {createCanvas} = require('canvas');
+const { Chart, registerables } = require('chart.js');
+Chart.register(...registerables);
 
 // --- CONFIGURACIÓN Y MIDDLEWARES ---
 
@@ -492,6 +496,7 @@ app.get('/api/results/:id', verifyToken, async (req, res) => {
   const { id } = req.params;  
   const userId = req.user.id;
 
+
   let connection;
   try {
     connection = await db.getConnection();
@@ -581,13 +586,13 @@ app.get('/api/results/:id', verifyToken, async (req, res) => {
       } else {
         // Preguntas tipo Slider o Rating
         if (encuesta.preguntas[i].idtipopregunta === 5) {
-        let resultadosSlider = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        let resultadosSlider = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
         for (let y = 0; y < encuesta.preguntas[i].respuestas.length; y++) {
-          resultadosSlider[Number(encuesta.preguntas[i].respuestas[y].respuesta)] += 1;
+          resultadosSlider[Number(encuesta.preguntas[i].respuestas[y].respuesta)-1] += 1;
         }
           resultadosFinales[i] = [
             [encuesta.preguntas[i].textopregunta, encuesta.preguntas[i].idtipopregunta],
-            [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+            [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
             resultadosSlider,
           ] 
         } else if (encuesta.preguntas[i].idtipopregunta === 6) {
@@ -597,14 +602,12 @@ app.get('/api/results/:id', verifyToken, async (req, res) => {
           }
           resultadosFinales[i] = [
             [encuesta.preguntas[i].textopregunta, encuesta.preguntas[i].idtipopregunta],
-            [0, 1, 2, 3, 4, 5],
+            [1, 2, 3, 4, 5],
             resultadosRanking
           ] 
         }
       }
     }
-
-
     //res.json(encuesta.preguntas);
     res.json(resultadosFinales);
 
@@ -679,5 +682,320 @@ app.get('/api/survey-by-token/:token', async (req, res) => {
   } catch (err) {
     console.error(`Error al obtener encuesta con token ${token}:`, err);
     res.status(500).json({ error: 'Error interno del servidor.' });
+  }
+});
+
+// Ruta para generar y enviar el PDF
+app.get('/api/pdf/:id', async (req, res) => {
+  const { id } = req.params;  
+
+  let connection;
+  try {
+    connection = await db.getConnection();
+
+    const query = 'SELECT * FROM enc_encuestasm WHERE idencuesta = ?';
+
+    const [surveyRows] = await connection.query(query, [id]);
+    
+    if (surveyRows.length === 0) {
+      connection.release();
+      return res.status(404).json({ error: 'Encuesta no encontrada o no tienes permiso para verla.' });
+    }
+    
+    const encuesta = surveyRows[0];
+
+    const [questions] = await connection.query(
+      'SELECT * FROM enc_pregunta WHERE idencuesta = ?',
+      [id]
+    );
+    
+    encuesta.preguntas = questions;
+
+    // 2. OBTENEMOS LOS RESULTADOS POR OPCION
+    for (const pregunta of questions) {
+      if (pregunta.idtipopregunta === 3 || pregunta.idtipopregunta === 4) {
+        const [options] = await connection.query('SELECT * FROM enc_opcion WHERE idpregunta = ?', [pregunta.idpregunta]);
+        pregunta.opciones = options;
+        const [resultado_opcion] = await connection.query('SELECT * FROM enc_respuestaopcion WHERE idpregunta = ?', [pregunta.idpregunta])
+        pregunta.respuestas = resultado_opcion;
+      } else {
+        const [respuestas_texto] = await connection.query('SELECT * FROM enc_respuestatexto WHERE idpregunta = ?', [pregunta.idpregunta]);
+        pregunta.respuestas = respuestas_texto; 
+      }
+      pregunta.requerida = pregunta.requerida === 'S';
+    }
+
+    let resultadosFinales = [];
+    for (i = 0; i < encuesta.preguntas.length; i++) {
+      if (encuesta.preguntas[i].idtipopregunta == 1 || encuesta.preguntas[i].idtipopregunta == 2) {
+        // Preguntas tipo Texto Corto o Texto Parrafo
+        let respuestatexto = [];
+        for (respuesta of encuesta.preguntas[i].respuestas) {
+          respuestatexto.push(respuesta.respuesta);
+        }
+
+        resultadosFinales[i] = [
+          [encuesta.preguntas[i].textopregunta, encuesta.preguntas[i].idtipopregunta],
+          respuestatexto
+        ];
+        
+      } else if (encuesta.preguntas[i].idtipopregunta == 3 || encuesta.preguntas[i].idtipopregunta == 4) {
+        // Preguntas tipo Opcion Unica o Opcion Multiple
+        
+        // Opciones
+        let opcionesnombres = [];
+        let respuestasopciones = [];
+        for (nombre of encuesta.preguntas[i].opciones) {
+          opcionesnombres.push(nombre.opcion)
+          respuestasopciones.push(0)
+        }
+
+        for (let y = 0; y < encuesta.preguntas[i].opciones.length; y++) {
+          for (let z = 0; z < encuesta.preguntas[i].respuestas.length; z++) {
+            if (encuesta.preguntas[i].opciones[y].idopciones === encuesta.preguntas[i].respuestas[z].idopciones) {
+              respuestasopciones[y] += 1;
+            }
+          }
+        }
+
+        resultadosFinales[i] = [
+          [encuesta.preguntas[i].textopregunta, encuesta.preguntas[i].idtipopregunta],
+          opcionesnombres,
+          respuestasopciones
+        ]
+
+      } else {
+        // Preguntas tipo Slider o Rating
+        if (encuesta.preguntas[i].idtipopregunta === 5) {
+        let resultadosSlider = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+        for (let y = 0; y < encuesta.preguntas[i].respuestas.length; y++) {
+          resultadosSlider[Number(encuesta.preguntas[i].respuestas[y].respuesta)-1] += 1;
+        }
+          resultadosFinales[i] = [
+            [encuesta.preguntas[i].textopregunta, encuesta.preguntas[i].idtipopregunta],
+            [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+            resultadosSlider,
+          ] 
+        } else if (encuesta.preguntas[i].idtipopregunta === 6) {
+          let resultadosRanking = [0, 0, 0, 0, 0]
+          for (let y = 0; y < encuesta.preguntas[i].respuestas.length; y++) {
+            resultadosRanking[Number(encuesta.preguntas[i].respuestas[y].respuesta)] += 1;
+          }
+          resultadosFinales[i] = [
+            [encuesta.preguntas[i].textopregunta, encuesta.preguntas[i].idtipopregunta],
+            [1, 2, 3, 4, 5],
+            resultadosRanking
+          ] 
+        }
+      }
+    }
+
+  const doc = new PDFDocument();
+  contador = 0;
+  // 🔹 Definir cabecera de respuesta como PDF
+  res.setHeader('Content-Type', 'application/pdf');
+  res.setHeader('Content-Disposition', 'inline; filename=archivo.pdf');
+
+  // 🔹 Generar el PDF y enviarlo directamente
+  doc.pipe(res);
+
+  doc.font("Helvetica-Bold").fontSize(22).text('Resultados de la encuesta: \n' + encuesta.nombre, { align: 'center' });
+  doc.moveDown();
+  doc.font("Helvetica").fontSize(14).text(encuesta.descripcion, { align: 'center' });
+  doc.moveDown();
+  doc.text(`Fecha: ${new Date().toLocaleString()}`, { align: 'center' });
+  doc.addPage();
+  
+  //console.log(resultadosFinales)
+  for (opcion of resultadosFinales) {
+    doc.moveDown();
+    doc.font('Helvetica-Bold').text("- " + opcion[0][0]);
+    doc.font('Helvetica');
+      doc.moveDown();
+    if (opcion[0][1] === 1 || opcion[0][1] === 2){
+      for (respuesta of opcion[1]) {
+        contador += 1;
+        doc.text(contador + ". " + respuesta);
+        doc.moveDown()
+      };
+      contador = 0;
+    } else if (opcion[0][1] === 3 || opcion[0][1] === 5) {
+      const canvas = createCanvas(800, 600); 
+      const ctx = canvas.getContext('2d');
+
+      // Chart.js configuration
+      const chartConfig = {
+          type: 'bar',
+          data: {
+              labels: opcion[1],
+              datasets: [{
+                  label: 'Sales',
+                  data: opcion[2],
+                        backgroundColor: [
+                          'rgba(255, 99, 132, 0.7)',
+                          'rgba(255, 159, 64, 0.7)',
+                          'rgba(255, 205, 86, 0.7)',
+                          'rgba(75, 192, 192, 0.7)',
+                          'rgba(54, 162, 235, 0.7)',
+                          'rgba(153, 102, 255, 0.7)',
+                          'rgba(201, 203, 207, 0.7)'
+                        ],
+                  borderColor: 'rgba(75, 192, 192, 1)',
+                  borderWidth: 1
+              }]
+          },
+          options: {
+              scales: {
+                  y: {
+                      beginAtZero: true
+                  }
+              },
+              plugins: {
+                legend: {
+                labels: {
+                  color: 'white'
+                },
+                  display: false,
+              }
+            }
+          }
+      };
+
+      new Chart(ctx, chartConfig);
+
+      const chartImageBuffer = canvas.toBuffer('image/png');
+          doc.image(chartImageBuffer, {
+            fit: [doc.page.width - 150, 400],
+            align: 'center',
+            valign: 'center'
+          });
+    } else if (opcion[0][1] === 4) {
+      const canvas = createCanvas(800, 600); 
+      const ctx = canvas.getContext('2d');
+
+      // Chart.js configuration
+      const chartConfig = {
+          type: 'doughnut', 
+          data: {
+              labels: opcion[1],
+              datasets: [{
+                  label: 'Sales',
+                  data: opcion[2],
+                        backgroundColor: [
+                          'rgba(255, 99, 132, 0.7)',
+                          'rgba(255, 159, 64, 0.7)',
+                          'rgba(255, 205, 86, 0.7)',
+                          'rgba(75, 192, 192, 0.7)',
+                          'rgba(54, 162, 235, 0.7)',
+                          'rgba(153, 102, 255, 0.7)',
+                          'rgba(201, 203, 207, 0.7)'
+                        ],
+                  borderColor: 'rgba(75, 192, 192, 1)',
+                  borderWidth: 1
+              }],
+          },
+          options: {
+              scales: {
+                  y: {
+                      beginAtZero: true
+                  }
+              },
+              plugins: {
+                legend: {
+                labels: {
+                  color: 'black'
+                },
+                display: true,
+              }
+            }
+          }
+      };
+
+      new Chart(ctx, chartConfig);
+
+      const chartImageBuffer = canvas.toBuffer('image/png');
+          doc.image(chartImageBuffer, {
+            fit: [doc.page.width - 150, 400],
+            align: 'center',
+            valign: 'center'
+          });
+      
+      doc.moveDown();
+
+      for (var i = 0; i < opcion[1].length; i++) {
+        doc.font("Helvetica-Bold").text(opcion[1][i]);
+        doc.font("Helvetica");
+        doc.text(opcion[2][i]);
+        doc.moveDown();
+      }
+      
+    } else if (opcion[0][1] === 6) {
+      const canvas = createCanvas(800, 600); 
+      const ctx = canvas.getContext('2d');
+
+      // Chart.js configuration
+      const chartConfig = {
+          type: 'bar', 
+          data: {
+              labels: opcion[1],
+              datasets: [{
+                  label: 'Sales',
+                  data: opcion[2],
+                        backgroundColor: [
+                          'rgba(255, 99, 132, 0.7)',
+                          'rgba(255, 159, 64, 0.7)',
+                          'rgba(255, 205, 86, 0.7)',
+                          'rgba(75, 192, 192, 0.7)',
+                          'rgba(54, 162, 235, 0.7)',
+                          'rgba(153, 102, 255, 0.7)',
+                          'rgba(201, 203, 207, 0.7)'
+                        ],
+                  borderColor: 'rgba(75, 192, 192, 1)',
+                  borderWidth: 1
+              }],
+          },
+          options: {
+              scales: {
+                  y: {
+                      beginAtZero: true
+                  }
+              },
+              indexAxis: 'y',
+              plugins: {
+                legend: {
+                labels: {
+                  color: 'black'
+                },
+                display: false,
+              }
+            }
+          }
+      };
+
+      new Chart(ctx, chartConfig);
+
+      const chartImageBuffer = canvas.toBuffer('image/png');
+          doc.image(chartImageBuffer, {
+            fit: [doc.page.width - 150, 400],
+            align: 'center',
+            valign: 'center'
+          });
+      
+      doc.moveDown();
+
+    } else {
+    }
+    doc.addPage();
+  }
+
+  doc.end();
+
+  } catch (err) {
+    // Si algo falla, este mensaje nos dirá qué fue
+    res.status(500).json({ error: 'Error interno del servidor.' });
+  } finally {
+    if (connection) {
+      connection.release();
+    }
   }
 });

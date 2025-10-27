@@ -4,7 +4,12 @@
       <p>{{ survey.descripcion }}</p>
       <p>Fecha: {{ fecha_formato }}</p>
     </div>
-</div>
+    <div class="bottom-right">
+      <button class="btn btn-primary" (click)="generarPdf()">Generar PDF</button>
+    </div>
+  </div>
+
+
 
 <div class="results-container">
   @for (opcion of resultados; track $index) {
@@ -16,14 +21,34 @@
       @for (respuesta of opcion[1]; track $index) {
         <p class="response-text">{{respuesta}}</p>
       }
-    } @else if (opcion[0][1] === 3 || opcion[0][1] === 4) {
+    } @else if (opcion[0][1] === 3) {
       {{createBarChart(opcion[1], opcion[2])}}
       <div class="chart-container">
         <canvas
                 baseChart
                 [data]="chartData"
                 [options]="chartOptions"
-                [type]="chartType">
+                [type]="chartTypeBar">
+        </canvas>
+      </div>
+    } @else if (opcion[0][1] === 4) {
+      {{createBarChart(opcion[1], opcion[2])}}
+      <div class="chart-container">
+        <canvas
+                baseChart
+                [data]="chartData"
+                [options]="chartPieOptions"
+                [type]="chartTypePie">
+        </canvas>
+      </div>
+    } @else if (opcion[0][1] == 5) {
+      {{createBarChart(opcion[1], opcion[2])}}
+      <div class="chart-container">
+        <canvas
+                baseChart
+                [data]="chartData"
+                [options]="chartOptions"
+                [type]="chartTypeBar">
         </canvas>
       </div>
     } @else {
@@ -32,11 +57,13 @@
         <canvas
             baseChart
             [data]="chartData"
-            [options]="chartOptions"
-            [type]="chartType">
+            [options]="chartHOptions"
+            [type]="chartTypeBar">
         </canvas>
       </div>
+
     }
+
   }
 
 

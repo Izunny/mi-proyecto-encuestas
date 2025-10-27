@@ -7,6 +7,7 @@ import { AuthService } from '../../services/auth.service';
 import { BrowserModule } from '@angular/platform-browser';
 import { BaseChartDirective  } from 'ng2-charts';
 import { Chart, ChartData, ChartOptions, registerables } from 'chart.js';
+
 Chart.defaults.color = "#fff";
 Chart.defaults.font.size = 20;
 
@@ -50,7 +51,17 @@ export class EncuestaResultadosComponent implements OnInit {
             display: false
         }
     }
-    
+  }
+
+    public chartPieOptions: ChartOptions = {
+    responsive: true,
+    plugins: {
+        legend: {
+          labels: {
+            color: 'white'
+          },
+        }
+    }
   }
 
   public chartData: ChartData<'bar'> = {
@@ -60,7 +71,10 @@ export class EncuestaResultadosComponent implements OnInit {
     }]
   };
 
-  public chartType: 'bar' = 'bar';
+  public chartTypeBar: 'bar' = 'bar';
+  public chartTypePie: 'doughnut' = 'doughnut';
+  
+  pdfUrl: string | undefined;
 
   constructor(
     private fb: FormBuilder,
@@ -145,7 +159,32 @@ export class EncuestaResultadosComponent implements OnInit {
     }
   }
 
-    goBack(): void {
-    this.router.navigate(['/dashboard']);
+  createPieChart(opcionesNombres: Array<string>, opcionesRespuestas: Array<number>): void {
+    this.chartData = {
+      datasets: [{
+      data: opcionesRespuestas,
+      backgroundColor: [
+      'rgba(255, 99, 132, 0.7)',
+      'rgba(255, 159, 64, 0.7)',
+      'rgba(255, 205, 86, 0.7)',
+      'rgba(75, 192, 192, 0.7)',
+      'rgba(54, 162, 235, 0.7)',
+      'rgba(153, 102, 255, 0.7)',
+      'rgba(201, 203, 207, 0.7)'
+    ],
+      }],
+      labels: opcionesNombres
+    }
   }
+
+  generarPdf() {
+        this.encuestasService.getPDF(this.surveyId).subscribe((data) => {
+        const file = new Blob([data], { type: 'application/pdf' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(file);
+        link.download = 'reporte.pdf';
+        link.click();
+    });
+  }
+
 }
