@@ -25,6 +25,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   isLoading = true;
   private userSubscription!: Subscription;
   
+  public isShareOptionsModalOpen = false;
   public isShareModalOpen = false;
   public shareUrl = '';
 

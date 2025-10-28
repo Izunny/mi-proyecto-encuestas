@@ -199,15 +199,12 @@ app.put('/api/surveys/:surveyId/status', verifyToken, async (req, res) => {
 
 // CREAR UNA NUEVA ENCUESTA 
 app.post('/api/surveys', verifyToken, async (req, res) => {
-  // ¡CORRECCIÓN DE SEGURIDAD! Obtenemos el idusuario del token.
   const { nombre, descripcion, fecha, activo, preguntas } = req.body;
   const idusuario = req.user.id
 
-  // 2. Definimos la variable 'connection' fuera del try para que sea accesible en el 'finally'
   let connection;
 
   try {
-    // 3. Obtenemos una conexión del pool. ESTA ES LA LÍNEA QUE FALTABA O ERA INCORRECTA.
     connection = await db.getConnection();
     await connection.beginTransaction();
 
@@ -244,7 +241,6 @@ app.post('/api/surveys', verifyToken, async (req, res) => {
     res.status(500).json({ error: 'Error interno del servidor al crear la encuesta.' });
 
   } finally {
-    // 4. Liberamos la conexión SIEMPRE, tanto si hubo éxito como si hubo error
     if (connection) connection.release();
   }
 });
@@ -254,27 +250,21 @@ app.get('/api/surveys/:id', verifyToken, async (req, res) => {
   const { id } = req.params;
   const userId = req.user.id;
   
-  // Mensaje 1: ¿Llega la petición y con qué datos?
   console.log(`--- PASO 1: Petición recibida para encuesta ID: ${id} (tipo: ${typeof id})`);
   
-  // Mensaje 2: ¿Qué usuario está verificado?
   console.log(`--- PASO 2: Usuario verificado con ID: ${userId} (tipo: ${typeof userId})`);
 
   let connection;
   try {
-    // Mensaje 3: ¿Podemos obtener una conexión a la BD?
     console.log('--- PASO 3: Intentando obtener conexión a la BD...');
     connection = await db.getConnection();
     console.log('--- PASO 4: Conexión obtenida. Ejecutando consulta de verificación...');
 
-    // 1. VERIFICAMOS QUE LA ENCUESTA EXISTA Y PERTENEZCA AL USUARIO
     const query = 'SELECT * FROM enc_encuestasm WHERE idencuesta = ? AND idusuario = ?';
-    // Mensaje 5: ¿Cuál es la consulta exacta que se está ejecutando?
     console.log('--- PASO 5: La consulta SQL es:', query, 'con valores:', [id, userId]);
 
     const [surveyRows] = await connection.query(query, [id, userId]);
     
-    // Mensaje 6: ¿Qué devolvió la base de datos?
     console.log('--- PASO 6: Resultado de la consulta de verificación:', surveyRows);
 
     if (surveyRows.length === 0) {
@@ -286,7 +276,6 @@ app.get('/api/surveys/:id', verifyToken, async (req, res) => {
     console.log('--- PASO 8: Encuesta encontrada. Obteniendo preguntas...');
     const encuesta = surveyRows[0];
 
-    // 2. OBTENEMOS LAS PREGUNTAS Y OPCIONES
     const [questions] = await connection.query(
       'SELECT * FROM enc_pregunta WHERE idencuesta = ? ORDER BY orden ASC',
       [id]
@@ -387,7 +376,6 @@ app.put('/api/surveys/:id', verifyToken, async (req, res) => {
 
 // GUARDAR LAS RESPUESTAS DE UNA ENCUESTA (VERSIÓN SEGURA)
 app.post('/api/responses', async (req, res) => {
-  // 2. Leemos 'token', 'idusuario' y 'respuestas' del body
   const { token, idusuario, respuestas } = req.body;
 
   if (!token || !idusuario || !respuestas) {
@@ -399,7 +387,6 @@ app.post('/api/responses', async (req, res) => {
     connection = await db.getConnection();
     await connection.beginTransaction();
 
-    // 3. Validamos el token (es nuestra nueva seguridad)
     const validationQuery = `
       SELECT idencuesta 
       FROM enc_tokens 
@@ -412,12 +399,10 @@ app.post('/api/responses', async (req, res) => {
     }
     const { idencuesta } = tokenRows[0];
 
-    // 4. Si el token es válido, guardamos la respuesta
     const responseQuery = 'INSERT INTO enc_respuesta (idencuesta, idusuario, fecha) VALUES (?, ?, NOW())';
     const [responseResult] = await connection.query(responseQuery, [idencuesta, idusuario]);
     const newResponseId = responseResult.insertId;
 
-    // 5. Guardamos cada respuesta individual (tu lógica estaba bien)
     for (const idpregunta of Object.keys(respuestas)) {
       const respuesta = respuestas[idpregunta];
       if (respuesta == null || respuesta === '') continue;
@@ -433,7 +418,6 @@ app.post('/api/responses', async (req, res) => {
       }
     }
 
-    // 6. Incrementamos el contador de usos del token
     await connection.query('UPDATE enc_tokens SET usos_actuales = usos_actuales + 1 WHERE token = ?', [token]);
 
     await connection.commit();
@@ -458,14 +442,12 @@ app.delete('/api/surveys/:id', verifyToken, async (req, res) => {
   try {
     connection = await db.getConnection();
     
-    // 1. ANTES de borrar, verificamos que la encuesta exista Y que pertenezca al usuario.
     const [surveyRows] = await connection.query(
       'SELECT idusuario FROM enc_encuestasm WHERE idencuesta = ?',
       [id]
     );
 
     if (surveyRows.length === 0) {
-      // Si no existe, devolvemos un error 404
       return res.status(404).json({ error: 'Encuesta no encontrada.' });
     }
     
@@ -473,8 +455,6 @@ app.delete('/api/surveys/:id', verifyToken, async (req, res) => {
       // Si no es el dueño, devolvemos un error de permisos 403
       return res.status(403).json({ error: 'No tienes permiso para eliminar esta encuesta.' });
     }
-
-    // 2. Si las comprobaciones pasan, procedemos a borrar.
     //    Solo borramos de la tabla principal. La base de datos (con ON DELETE CASCADE)
     //    se encargará de borrar las preguntas y opciones relacionadas.
     const query = 'DELETE FROM enc_encuestasm WHERE idencuesta = ?';
@@ -640,7 +620,6 @@ app.post('/api/surveys/:id/share', async (req, res) => {
   }
 });
 
-// --- 👆👆 FIN: NUEVA RUTA 👆👆 ---
 
 
 // --- OBTENER ENCUESTA POR TOKEN (PARA LA PÁGINA DE RESPONDER) ---
@@ -711,7 +690,6 @@ app.get('/api/pdf/:id', async (req, res) => {
     
     encuesta.preguntas = questions;
 
-    // 2. OBTENEMOS LOS RESULTADOS POR OPCION
     for (const pregunta of questions) {
       if (pregunta.idtipopregunta === 3 || pregunta.idtipopregunta === 4) {
         const [options] = await connection.query('SELECT * FROM enc_opcion WHERE idpregunta = ?', [pregunta.idpregunta]);
@@ -792,11 +770,9 @@ app.get('/api/pdf/:id', async (req, res) => {
 
   const doc = new PDFDocument();
   contador = 0;
-  // 🔹 Definir cabecera de respuesta como PDF
   res.setHeader('Content-Type', 'application/pdf');
   res.setHeader('Content-Disposition', 'inline; filename=archivo.pdf');
 
-  // 🔹 Generar el PDF y enviarlo directamente
   doc.pipe(res);
 
   doc.font("Helvetica-Bold").fontSize(22).text('Resultados de la encuesta: \n' + encuesta.nombre, { align: 'center' });
