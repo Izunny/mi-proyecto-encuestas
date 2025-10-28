@@ -11,6 +11,7 @@ import { FooterComponent } from './components/footer/footer.component';
     RouterOutlet,
     HeaderComponent,
     FooterComponent,
+    ModalAlertComponent,
   ],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']

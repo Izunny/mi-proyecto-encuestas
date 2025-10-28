@@ -1,1 +1,35 @@
-<p>modal-alert works!</p>
+<!-- 
+  Usamos el pipe 'async'. Esto suscribe automáticamente al observable alert$.
+  Si alert$ emite 'null', todo este div desaparece.
+  Si emite un objeto AlertConfig, 'alert' toma ese valor y el div aparece.
+-->
+<div *ngIf="alert$ | async as alert" class="modal-overlay" (click)="close()">
+  <!-- (click)="$event.stopPropagation()" evita que el modal se cierre al hacer clic dentro -->
+  <div class="modal-content" (click)="$event.stopPropagation()" [ngClass]="'alert-' + alert.type">
+    
+    <div class="modal-icon">
+      <!-- Mostramos un icono diferente según el tipo de alerta -->
+      <i *ngIf="alert.type === 'success'" class="fas fa-check-circle"></i>
+      <i *ngIf="alert.type === 'error'" class="fas fa-exclamation-triangle"></i>
+      <i *ngIf="alert.type === 'confirm'" class="fas fa-question-circle"></i>
+    </div>
+    
+    <div class="modal-body">
+      <p>{{ alert.message }}</p>
+    </div>
+    
+    <div class="modal-footer">
+      <!-- Si es una confirmación, mostramos dos botones -->
+      <ng-container *ngIf="alert.type === 'confirm'">
+        <button class="btn btn-secondary" (click)="close()">Cancelar</button>
+        <button class="btn btn-primary" (click)="confirm(alert)">Aceptar</button>
+      </ng-container>
+      
+      <!-- Si es éxito o error, mostramos un solo botón -->
+      <ng-container *ngIf="alert.type !== 'confirm'">
+        <button class="btn btn-primary" (click)="close()">Entendido</button>
+      </ng-container>
+    </div>
+    
+  </div>
+</div>

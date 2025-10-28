@@ -7,6 +7,7 @@ import { AuthService } from '../../services/auth.service';
 import { Subscription } from 'rxjs';
 import { Encuesta } from '../../interfaces/encuesta.interface';
 import { QRCodeComponent } from 'angularx-qrcode';
+import { AlertService } from '../../services/alert.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -31,7 +32,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   constructor(
     private encuestasService: EncuestasService, 
-    private authService: AuthService
+    private authService: AuthService,
+    private alertService: AlertService
   ) { }
 
   ngOnInit(): void {
@@ -165,39 +167,52 @@ filterSurveys(): void {
     this.selectedSurveyId = id;
   }
 
+  // ... (dentro de tu clase DashboardComponent)
+
   deleteSelectedSurvey(): void {
     if (!this.selectedSurveyId) {
-      alert('Por favor, selecciona una encuesta para eliminar.');
+      // Usamos el nuevo servicio de alertas
+      this.alertService.show('Por favor, selecciona una encuesta para eliminar.', 'error');
       return;
     }
+    
+    // Buscamos la encuesta para ver si tiene respuestas
     const surveyToDelete = this.surveys.find(s => s.idencuesta === this.selectedSurveyId);
-
     if (!surveyToDelete) return; 
 
+    // Preparamos el mensaje de confirmación
     let confirmationMessage = '¿Estás seguro de que quieres eliminar esta encuesta?';
-
     if (surveyToDelete.responseCount > 0) {
-      confirmationMessage = `¡ATENCIÓN! Esta encuesta ya tiene ${surveyToDelete.responseCount} respuesta(s). Si la eliminas, se borrarán permanentemente todos los resultados.\n\n¿Estás seguro de que quieres continuar?`;
+      confirmationMessage = `¡ATENCIÓN! Esta encuesta ya tiene ${surveyToDelete.responseCount} respuesta(s). Se borrarán todos los resultados.\n\n¿Deseas continuar?`;
     }
 
-    if (confirm(confirmationMessage)) {
-      this.encuestasService.deleteSurvey(this.selectedSurveyId).subscribe({
+    // 1. Usamos el nuevo 'confirm' del servicio
+    this.alertService.confirm(confirmationMessage, () => {
+      
+      // 2. Esta función de flecha SÓLO se ejecuta si el usuario presiona "Aceptar"
+      this.encuestasService.deleteSurvey(this.selectedSurveyId!).subscribe({
         next: () => {
-          alert('Encuesta eliminada con éxito.');
+          this.alertService.show('Encuesta eliminada con éxito.', 'success');
+          
+          // --- 👇 ¡AQUÍ ESTÁ LA MAGIA! 👇 ---
+          // 3. Una vez eliminada, volvemos a cargar la lista que esté activa.
+          //    La nueva lista vendrá sin la encuesta que acabamos de borrar.
           if (this.viewMode === 'user') {
             this.loadUserSurveys();
           } else {
             this.loadAllSurveys();
           }
-          this.selectedSurveyId = null;
+          // --- 👆 FIN DE LA MAGIA 👆 ---
+
+          this.selectedSurveyId = null; // Limpiamos la selección
         },
         error: (err: any) => {
-          console.error('Error al eliminar la encuesta:', err);
-          alert('Error al eliminar la encuesta: ' + (err.error?.message || err.message));
+          this.alertService.show('Error al eliminar la encuesta.', 'error');
         }
       });
-    }
+    });
   }
+
 
   logout(): void {
     this.authService.logout();
