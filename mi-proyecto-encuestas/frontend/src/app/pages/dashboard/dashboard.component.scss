@@ -51,17 +51,30 @@
   }
 }
 
-.nav-menu a {
+.nav-menu {
+  .btn {
+    color: #ffffff; 
+    margin-right: 10px;
+    text-decoration: none;
+    transition: background-color 0.2s ease, color 0.2s ease, opacity 0.2s ease;
 
-  color: white !important;    
-  text-decoration: none;         
+    &:hover {
+      background-color: #303f9f;
+    }
+
+    &.disabled {
+      color: #838383;          
+      opacity: 0.6;              
+      pointer-events: none;      
+      cursor: not-allowed;       
+    }
+  }
 }
-
 .mb-3 {
     margin: 20px;
 }
 
-.nav-menu a:hover {
+.nav-menu .btn:hover {
   color: #ddd !important;
 }
 
@@ -166,7 +179,7 @@
 
 
  .survey-title-input {
-    background-color: transparent;
+    background-color: rgba(255, 255, 255, 0.158);
     border: 1px solid var(--border-color);
     border-radius: 6px;
     padding: 5px;
@@ -237,9 +250,10 @@
 
 /* Estilo para el botón de descarga */
 .btn-secondary {
-  background-color: #6c757d;
-  color: white;
-  border: none;
+ color: #ffffff; /* Color del texto cuando está activo (blanco) */
+    background-color: #3f51b5; /* Color de fondo activo (ejemplo: azul) */
+    margin-right: 10px;
+    text-decoration: none;
   padding: 10px 16px;
   border-radius: 6px;
   cursor: pointer;

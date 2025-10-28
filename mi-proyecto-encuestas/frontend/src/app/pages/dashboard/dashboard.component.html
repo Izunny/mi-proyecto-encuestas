@@ -1,84 +1,84 @@
-
 <div class="dashboard-container">
+  <main class="main-content">
+    <div class="mb-3">
 
-  <main class="main-content"> 
-
-  <div class="mb-3">
-
-    <nav class="nav-menu">
+      <nav class="nav-menu">
         
-        <a class="btn btn-light" 
-          [class.disabled]="!selectedSurveyId" 
-          [routerLink]="['/encuesta/resultados', selectedSurveyId]">Ver Resultados</a>
+        <a class="btn btn-light"
+           [class.disabled]="!selectedSurveyId"
+           [routerLink]="selectedSurveyId ? ['/encuesta/resultados', selectedSurveyId] : null">Ver Resultados</a>
 
-        <a class="btn btn-light" [class.disabled]="!selectedSurveyId" (click)="shareSurvey()">Compartir Encuesta</a>
+        <a class="btn btn-light"
+           [class.disabled]="!selectedSurveyId"
+           (click)="shareSurvey()">Compartir Encuesta</a>
 
-        <a class="btn btn-light" 
-          [class.disabled]="!selectedSurveyId" 
-          [routerLink]="['/encuesta/editar', selectedSurveyId]">Editar Encuesta</a>
+        <a class="btn btn-light"
+           [class.disabled]="!selectedSurveyId"
+           [routerLink]="selectedSurveyId ? ['/encuesta/editar', selectedSurveyId] : null">Editar Encuesta</a>
 
-    </nav>
-
-  
-
+      </nav>
 
       <div class="search-actions">
         
-        <input type="text" 
-              class="survey-title-input" 
-              placeholder="Buscar encuesta..." 
-              [(ngModel)]="searchTerm"
-              (input)="filterSurveys()"> <div class="actions">
+        <input type="text"
+               class="survey-title-input"
+               placeholder="Buscar encuesta..."
+               [(ngModel)]="searchTerm"
+               (input)="filterSurveys()">
+        
+        <div class="actions">
           <button class="btn btn-info me-2" (click)="toggleView()">
-            {{ viewMode === 'user' ? 'Ver Todas las Encuestas' : 'Ver Mis Encuestas' }}
+         <!--   {{ viewMode === 'user' ? 'Ver Todas las Encuestas' : 'Ver Encuestas' }} -->
           </button>
-
-          <a class="btn btn-secondary me-2" 
-            [class.disabled]="!selectedSurveyId" 
-            (click)="deleteSelectedSurvey()">Eliminar</a>
-
-          <a class="btn btn-secondary" 
-            [routerLink]="['/encuesta/agregar']">Crear</a>
+          
+          <a class="btn btn-secondary me-2"
+             [class.disabled]="!selectedSurveyId"
+             (click)="deleteSelectedSurvey()">Eliminar</a>
+          
+          <a class="btn btn-secondary"
+             [routerLink]="['/encuesta/agregar']">Crear</a>
         </div>
       </div>
 
+      <div class="card-body">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th></th>
+              <th>Título</th>
+              <th>Descripción</th>
+              <th>Usuario</th>
+              <th>Fecha</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let survey of filteredSurveys">
+              <td>
+                <input type="radio" name="seleccionEncuesta" [value]="survey.idencuesta" (click)="selectSurvey(survey.idencuesta)">
+              </td>
+              <td>{{ survey.nombre }}</td>
+              <td>{{ survey.descripcion }}</td>
+              
+              <td>{{ survey.username }}</td>
+              
+              <td>{{ survey.fecha | date: 'dd/MM/yyyy' }}</td>
+              <td>
+                <button class="btn btn-sm"
+                        [ngClass]="survey.activo === 'S' ? 'btn-success' : 'btn-danger'"
+                        (click)="changeStatus(survey)">
+                  {{ survey.activo === 'S' ? 'Activo' : 'Inactivo' }}
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
 
-    <div class="card-body"> 
-      <table class="table table-hover">
-        <thead>
-          <tr>
-            <th></th> 
-            <th>Título</th>
-            <th>Descripción</th>
-            <th>Usuario</th>
-            <th>Fecha</th>
-            <th>Estado</th> 
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let survey of filteredSurveys">
-            <td>
-              <input type="radio" name="seleccionEncuesta" [value]="survey.idencuesta" (click)="selectSurvey(survey.idencuesta)">
-            </td>
-            <td>{{ survey.nombre }}</td>
-            <td>{{ survey.descripcion }}</td>
-            <td>{{ survey.username }}</td>
-            <td>{{ survey.fecha | date: 'dd/MM/yyyy' }}</td>
-            <td>
-              <button class="btn btn-sm" 
-                      [ngClass]="survey.activo === 'S' ? 'btn-success' : 'btn-danger'"
-                      (click)="changeStatus(survey)">
-                {{ survey.activo === 'S' ? 'Activo' : 'Inactivo' }}
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
     </div>
-
-  </div>
   </main>
 </div>
+
 
 <div *ngIf="isShareModalOpen" class="modal-overlay" (click)="isShareModalOpen = false">
   <div class="modal-content" (click)="$event.stopPropagation()">
@@ -95,13 +95,11 @@
       </div>
 
       <div class="qr-code-container">
-        <!-- 👇 La etiqueta y propiedad correctas para 'angularx-qrcode' 👇 -->
         <qrcode [qrdata]="shareUrl" [width]="200" #myQRCode></qrcode>
         <p>O escanea el código QR</p>
       </div>
     </div>
     <div class="modal-footer">
-  <!-- 👇 2. Pasamos 'myQRCode' como argumento a la función 👇 -->
   <button class="btn btn-secondary" (click)="downloadQRCode(myQRCode)">
     <i class="fas fa-download"></i> Descargar QR
   </button>

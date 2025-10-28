@@ -32,7 +32,6 @@ export class EncuestaResponderComponent implements OnInit {
       respuestas: this.fb.group({})
     });
     
-    // --- 👇 CORRECCIÓN 1: Leemos el 'token' de la URL 👇 ---
     this.surveyToken = this.route.snapshot.paramMap.get('token') || '';
 
     if (this.surveyToken) {
@@ -45,7 +44,6 @@ export class EncuestaResponderComponent implements OnInit {
     }
   }
 
-  // --- 👇 CORRECCIÓN 2: Usamos la función de 'getSurveyByToken' 👇 ---
   loadSurveyByToken(): void {
     this.isLoading = true;
     this.encuestasService.getSurveyByToken(this.surveyToken).subscribe({
@@ -120,7 +118,6 @@ export class EncuestaResponderComponent implements OnInit {
       }
     }
 
-    // --- 👇 CORRECCIÓN 3: Preparamos los datos con 'token' e 'idusuario' 👇 ---
     const submissionData = {
       token: this.surveyToken, // Enviamos el token para la validación
       idusuario: 1,           // Usamos '1' como ID de usuario "Anónimo"
@@ -136,7 +133,6 @@ export class EncuestaResponderComponent implements OnInit {
       },
       error: (err: any) => {
         console.error('Error al enviar las respuestas:', err);
-        // El backend ahora nos da errores más claros
         alert(`Ocurrió un error: ${err.error.error || 'Inténtalo de nuevo.'}`);
       }
     });
