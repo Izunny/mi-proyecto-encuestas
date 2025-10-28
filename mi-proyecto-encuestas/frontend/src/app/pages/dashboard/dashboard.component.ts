@@ -6,19 +6,17 @@ import { EncuestasService } from '../../services/encuestas.service';
 import { AuthService } from '../../services/auth.service';
 import { Subscription } from 'rxjs';
 import { Encuesta } from '../../interfaces/encuesta.interface';
-// --- 1. IMPORTAMOS EL COMPONENTE DE QR DE LA LIBRERÍA CORRECTA ---
 import { QRCodeComponent } from 'angularx-qrcode';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  // --- 2. AÑADIMOS QRCodeComponent A LOS IMPORTS ---
   imports: [ CommonModule, FormsModule, RouterModule, QRCodeComponent ],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss']
 })
 export class DashboardComponent implements OnInit, OnDestroy {
-  // --- Tus propiedades existentes ---
+  // --- propiedades  ---
   surveys: Encuesta[] = [];
   filteredSurveys: Encuesta[] = [];
   selectedSurveyId: number | null = null;
@@ -27,7 +25,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
   isLoading = true;
   private userSubscription!: Subscription;
   
-  // --- 3. VARIABLES PARA MANEJAR EL MODAL ---
   public isShareModalOpen = false;
   public shareUrl = '';
 
@@ -39,7 +36,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.userSubscription = this.authService.user$.subscribe(user => {
       if (user) { this.loadUserSurveys(); } 
-      else { /* ... (tu lógica si no hay usuario) ... */ }
+      else { /* ... (no hay usuario) ... */ }
     });
   }
 
@@ -47,7 +44,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
     if (this.userSubscription) { this.userSubscription.unsubscribe(); }
   }
 
-  // --- 4. LÓGICA COMPLETA PARA 'shareSurvey' ---
   shareSurvey(): void {
     if (!this.selectedSurveyId) return;
 
@@ -72,13 +68,38 @@ export class DashboardComponent implements OnInit, OnDestroy {
     });
   }
 
-  // --- 5. FUNCIÓN PARA COPIAR LA URL ---
   copyUrlToClipboard(): void {
     navigator.clipboard.writeText(this.shareUrl).then(() => {
       alert('¡Enlace copiado al portapapeles!');
     }).catch(err => {
       console.error('Error al copiar el enlace:', err);
     });
+  }
+
+  downloadQRCode(qrCodeInstance: QRCodeComponent): void {
+    try {
+      // --- ✨ ESTA ES LA CORRECCIÓN CLAVE ✨ ---
+      // La propiedad correcta no es 'el', es 'qrcElement'
+      const canvas = qrCodeInstance.qrcElement.nativeElement.querySelector('canvas');
+      
+      if (!canvas) {
+        console.error("No se pudo encontrar el canvas del QR.");
+        return;
+      }
+
+      // El resto de la función (crear el enlace, etc.) estaba perfecta
+      const dataUrl = canvas.toDataURL('image/png');
+      const link = document.createElement('a');
+      link.href = dataUrl;
+      link.download = 'encuesta-qr.png';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+    } catch (err) {
+      console.error('Error al descargar el QR:', err);
+      alert('No se pudo descargar el código QR.');
+    }
   }
   
   loadUserSurveys(): void {
@@ -112,7 +133,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }
   }
 
-  // --- El resto de tus métodos (filterSurveys, changeStatus, etc.) no necesitan cambios ---
   
 filterSurveys(): void {
   console.log('3. [filterSurveys] Filtrando las encuestas...');
@@ -123,7 +143,6 @@ filterSurveys(): void {
       survey.nombre.toLowerCase().includes(this.searchTerm.toLowerCase())
     );
   }
-  // ESTE ES EL MENSAJE MÁS IMPORTANTE:
   console.log('4. [filterSurveys] El arreglo final para mostrar en la tabla es:', this.filteredSurveys);
 }
 

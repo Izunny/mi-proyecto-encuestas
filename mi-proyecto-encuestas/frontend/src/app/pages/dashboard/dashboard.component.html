@@ -96,9 +96,18 @@
 
       <div class="qr-code-container">
         <!-- 👇 La etiqueta y propiedad correctas para 'angularx-qrcode' 👇 -->
-        <qrcode [qrdata]="shareUrl" [width]="200"></qrcode>
+        <qrcode [qrdata]="shareUrl" [width]="200" #myQRCode></qrcode>
         <p>O escanea el código QR</p>
       </div>
     </div>
+    <div class="modal-footer">
+  <!-- 👇 2. Pasamos 'myQRCode' como argumento a la función 👇 -->
+  <button class="btn btn-secondary" (click)="downloadQRCode(myQRCode)">
+    <i class="fas fa-download"></i> Descargar QR
+  </button>
+  <button class="btn btn-primary" (click)="isShareModalOpen = false">
+    Cerrar
+  </button>
+</div>
   </div>
 </div>
