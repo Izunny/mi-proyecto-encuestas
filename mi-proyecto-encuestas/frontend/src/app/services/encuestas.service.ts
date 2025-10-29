@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 @Injectable({
@@ -61,5 +61,10 @@ export class EncuestasService {
   // Generar PDF
   getPDF(surveyId: number): Observable<any> {
     return this.http.get(`${this.apiUrl}/api/pdf/${surveyId}`, { responseType: 'blob' });
+  }
+
+  // Generar un archivo XLSX
+  getXLSX(surveyId: number): Observable<any> {
+    return this.http.get(`${this.apiUrl}/api/XLSX/${surveyId}`, { responseType: 'blob' });
   }
 }

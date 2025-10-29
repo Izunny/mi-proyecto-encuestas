@@ -182,9 +182,18 @@ export class EncuestaResultadosComponent implements OnInit {
         const file = new Blob([data], { type: 'application/pdf' });
         const link = document.createElement('a');
         link.href = URL.createObjectURL(file);
-        link.download = 'reporte.pdf';
+        link.download = 'resultados.pdf';
         link.click();
     });
   }
 
+  generarXLSX(){
+    this.encuestasService.getXLSX(this.surveyId).subscribe((data) => {
+        const file = new Blob([data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(file);
+        link.download = 'resultados.xlsx';
+        link.click();
+  });
+  }
 }

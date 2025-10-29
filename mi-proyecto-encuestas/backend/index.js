@@ -9,6 +9,7 @@ const fs = require('fs');
 const app = express();
 const crypto = require('crypto');
 const path = require('path');
+const ExcelJS = require('exceljs');
 const {createCanvas} = require('canvas');
 const { Chart, registerables } = require('chart.js');
 Chart.register(...registerables);
@@ -974,4 +975,215 @@ app.get('/api/pdf/:id', async (req, res) => {
       connection.release();
     }
   }
+});
+
+// Ruta para generar y enviar el XLSX
+app.get('/api/XLSX/:id', async (req, res) => {
+  // ---------- Generacion de JSON con resultados, se repite en el metodo GET de resultados -----------------
+  const { id } = req.params; 
+
+  
+  let connection;
+  try {
+    connection = await db.getConnection();
+    const query = 'SELECT * FROM enc_encuestasm WHERE idencuesta = ?';
+    const [surveyRows] = await connection.query(query, [id]);
+    if (surveyRows.length === 0) {
+      connection.release();
+      return res.status(404).json({ error: 'Encuesta no encontrada o no tienes permiso para verla.' });
+    }
+    const encuesta = surveyRows[0];
+    const [questions] = await connection.query(
+      'SELECT * FROM enc_pregunta WHERE idencuesta = ?',
+      [id]
+    );
+
+
+    encuesta.preguntas = questions;
+    for (const pregunta of questions) {
+      if (pregunta.idtipopregunta === 3 || pregunta.idtipopregunta === 4) {
+        const [options] = await connection.query('SELECT * FROM enc_opcion WHERE idpregunta = ?', [pregunta.idpregunta]);
+        pregunta.opciones = options;
+        const [resultado_opcion] = await connection.query('SELECT * FROM enc_respuestaopcion WHERE idpregunta = ?', [pregunta.idpregunta])
+        pregunta.respuestas = resultado_opcion;
+      } else {
+        const [respuestas_texto] = await connection.query('SELECT * FROM enc_respuestatexto WHERE idpregunta = ?', [pregunta.idpregunta]);
+        pregunta.respuestas = respuestas_texto; 
+      }
+      pregunta.requerida = pregunta.requerida === 'S';
+    }
+    let resultadosFinales = [];
+    for (i = 0; i < encuesta.preguntas.length; i++) {
+      if (encuesta.preguntas[i].idtipopregunta == 1 || encuesta.preguntas[i].idtipopregunta == 2) {
+        let respuestatexto = [];
+        for (respuesta of encuesta.preguntas[i].respuestas) {
+          respuestatexto.push(respuesta.respuesta);
+        }
+        resultadosFinales[i] = [
+          [encuesta.preguntas[i].textopregunta, encuesta.preguntas[i].idtipopregunta],
+          respuestatexto
+        ];        
+      } else if (encuesta.preguntas[i].idtipopregunta == 3 || encuesta.preguntas[i].idtipopregunta == 4) {
+        let opcionesnombres = [];
+        let respuestasopciones = [];
+        for (nombre of encuesta.preguntas[i].opciones) {
+          opcionesnombres.push(nombre.opcion)
+          respuestasopciones.push(0)
+        }
+        for (let y = 0; y < encuesta.preguntas[i].opciones.length; y++) {
+          for (let z = 0; z < encuesta.preguntas[i].respuestas.length; z++) {
+            if (encuesta.preguntas[i].opciones[y].idopciones === encuesta.preguntas[i].respuestas[z].idopciones) {
+              respuestasopciones[y] += 1;
+            }
+          }
+        }
+        resultadosFinales[i] = [
+          [encuesta.preguntas[i].textopregunta, encuesta.preguntas[i].idtipopregunta],
+          opcionesnombres,
+          respuestasopciones
+        ]
+      } else {
+        if (encuesta.preguntas[i].idtipopregunta === 5) {
+        let resultadosSlider = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+        for (let y = 0; y < encuesta.preguntas[i].respuestas.length; y++) {
+          resultadosSlider[Number(encuesta.preguntas[i].respuestas[y].respuesta)-1] += 1;
+        }
+          resultadosFinales[i] = [
+            [encuesta.preguntas[i].textopregunta, encuesta.preguntas[i].idtipopregunta],
+            [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+            resultadosSlider,
+          ] 
+        } else if (encuesta.preguntas[i].idtipopregunta === 6) {
+          let resultadosRanking = [0, 0, 0, 0, 0]
+          for (let y = 0; y < encuesta.preguntas[i].respuestas.length; y++) {
+            resultadosRanking[Number(encuesta.preguntas[i].respuestas[y].respuesta)] += 1;
+          }
+          resultadosFinales[i] = [
+            [encuesta.preguntas[i].textopregunta, encuesta.preguntas[i].idtipopregunta],
+            [1, 2, 3, 4, 5],
+            resultadosRanking
+          ] 
+        }
+      }
+    }
+    
+  // --------------- Final de JSON de resultados -------------------------------------------
+
+  try {
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Resultados');
+
+    // Informacion de la encuesta
+    worksheet.addRow([encuesta.nombre]);
+    worksheet.getCell('A1').font = { bold: true };
+    worksheet.addRow([encuesta.descripcion]);
+    worksheet.getCell('B2').value = encuesta.fecha;
+    worksheet.addRow(['']);
+
+    // Preguntas y resultados
+    for (preguntas of resultadosFinales) {
+      // Preguntas texto corto y parrafo
+      if (preguntas[0][1] === 1 || preguntas[0][1] === 2) {
+        // Nombre de la pregunta
+        bold = worksheet.addRow([preguntas[0][0]]);
+        bold.eachCell((cell) => {
+          cell.font = { bold: true};
+        });
+        arrayOpciones = [];
+        // Preguntas
+        for (opcion of preguntas[1]){
+          // Respuestas
+          arrayOpciones.push(opcion);
+        }
+        worksheet.addRow(arrayOpciones);
+        worksheet.addRow(['']);
+        
+        // Preguntas opcion unicas y multiples 
+    } else if (preguntas[0][1] === 3 || preguntas[0][1] === 4) {
+      // Nombre de la pregunta
+        bold = worksheet.addRow([preguntas[0][0]]);
+        bold.eachCell((cell) => {
+          cell.font = { bold: true};
+        });
+        arrayOpciones = [];
+
+      // Preguntas
+      arrayOpciones = [];
+      for (opcion of preguntas[1]){
+        arrayOpciones.push(opcion);
+      }
+      worksheet.addRow(arrayOpciones);
+
+      // Respuestas
+      arrayRespuestas = [];
+      for (respuesta of preguntas[2]){
+        arrayRespuestas.push(respuesta);
+      }
+      worksheet.addRow(arrayRespuestas);
+      worksheet.addRow(['']);
+      
+      // Preguntas slider
+    } else if (preguntas[0][1] === 5) {
+      // Nombre de la pregunta
+        bold = worksheet.addRow([preguntas[0][0]]);
+        bold.eachCell((cell) => {
+          cell.font = { bold: true};
+        });
+        arrayOpciones = [];
+
+      // Preguntas
+      worksheet.addRow([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+
+      // Respuestas
+      arrayRespuestas = [];
+      for (respuesta of preguntas[2]) {
+        arrayRespuestas.push(respuesta);
+      };
+      worksheet.addRow(arrayRespuestas);
+      worksheet.addRow(['']);
+
+    } else if (preguntas[0][1] === 6) {
+      // Nombre de la pregunta
+        bold = worksheet.addRow([preguntas[0][0]]);
+        bold.eachCell((cell) => {
+          cell.font = { bold: true};
+        });
+        arrayOpciones = [];
+
+      // Preguntas
+      worksheet.addRow([1, 2, 3, 4, 5]);
+
+      // Respuestas
+      arrayRespuestas = [];
+      for (respuesta of preguntas[2]) {
+        arrayRespuestas.push(respuesta);
+      };
+      worksheet.addRow(arrayRespuestas);
+      worksheet.addRow(['']);
+    };
+
+    };
+
+  // Write file to response
+  await workbook.xlsx.write(res);
+  console.log(resultadosFinales);
+  res.end();
+  
+  console.log('Excel file created successfully!');
+
+  } catch (err) {
+    console.error('Error generating Excel:', err);
+    res.status(500).send('Error generating file');
+  }
+
+
+  } catch (err) {
+    // Si algo falla, este mensaje nos dirá qué fue
+    res.status(500).json({ error: 'Error interno del servidor.' });
+  } finally {
+    if (connection) {
+      connection.release();
+    }
+  }
+
 });
