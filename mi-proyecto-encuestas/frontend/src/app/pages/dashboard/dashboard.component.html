@@ -27,9 +27,9 @@
                (input)="filterSurveys()">
         
         <div class="actions">
-          <button class="btn btn-info me-2" (click)="toggleView()">
+          <!--  <button class="btn btn-info me-2" (click)="toggleView()">-->
          <!--   {{ viewMode === 'user' ? 'Ver Todas las Encuestas' : 'Ver Encuestas' }} -->
-          </button>
+          <!--  </button>-->
           
           <a class="btn btn-secondary me-2"
              [class.disabled]="!selectedSurveyId"
@@ -80,11 +80,48 @@
 </div>
 
 
-<div *ngIf="isShareModalOpen" class="modal-overlay" (click)="isShareModalOpen = false">
+<div *ngIf="isShareOptionsModalOpen" class="modal-overlay" (click)="isShareOptionsModalOpen = false">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Configurar Enlace</h2>
+      <button class="close-btn" (click)="isShareOptionsModalOpen = false">&times;</button>
+    </div>
+    <div class="modal-body">
+      <p>Establece los límites para tu enlace de encuesta.</p>
+      
+    
+      <div class="form-group">
+        <label for="maxUses">Límite de Respuestas</label>
+        <input type="number" id="maxUses" [(ngModel)]="shareOptions.maxUses" placeholder="0 para ilimitado">
+        <small class="form-help">Número máximo de veces que se puede usar este enlace. Deja en 0 o vacío para usos ilimitados.</small>
+      </div>
+
+      <div class="form-group">
+        <label for="durationDays">Duración (en días)</label>
+        <input type="number" id="durationDays" [(ngModel)]="shareOptions.durationDays">
+        <small class="form-help">Por cuántos días será válido este enlace (por defecto 7).</small>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="isShareOptionsModalOpen = false">
+        Cancelar
+      </button>
+     
+      <button class="btn btn-primary" (click)="onGenerateShareLink()">
+        <i class="fas fa-link"></i> Generar Enlace
+      </button>
+    </div>
+  </div>
+</div>
+
+
+
+<div *ngIf="isShareLinkModalOpen" class="modal-overlay" (click)="isShareLinkModalOpen = false">
   <div class="modal-content" (click)="$event.stopPropagation()">
     <div class="modal-header">
       <h2>Comparte tu Encuesta</h2>
-      <button class="close-btn" (click)="isShareModalOpen = false">&times;</button>
+      <button class="close-btn" (click)="isShareLinkModalOpen = false">&times;</button>
     </div>
     <div class="modal-body">
       <p>Cualquier persona con este enlace podrá responder tu encuesta.</p>
@@ -95,17 +132,18 @@
       </div>
 
       <div class="qr-code-container">
+       
         <qrcode [qrdata]="shareUrl" [width]="200" #myQRCode></qrcode>
         <p>O escanea el código QR</p>
       </div>
     </div>
     <div class="modal-footer">
-  <button class="btn btn-secondary" (click)="downloadQRCode(myQRCode)">
-    <i class="fas fa-download"></i> Descargar QR
-  </button>
-  <button class="btn btn-primary" (click)="isShareModalOpen = false">
-    Cerrar
-  </button>
-</div>
+      <button class="btn btn-secondary" (click)="downloadQRCode()">
+        <i class="fas fa-download"></i> Descargar QR
+      </button>
+      <button class="btn btn-primary" (click)="isShareLinkModalOpen = false">
+        Cerrar
+      </button>
+    </div>
   </div>
 </div>

@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { EncuestasService } from '../../services/encuestas.service'; 
 import { CdkDragDrop, moveItemInArray, DragDropModule } from '@angular/cdk/drag-drop';
 import { AuthService } from '../../services/auth.service';
+import { AlertService } from '../../services/alert.service';
 
 @Component({
   selector: 'app-encuesta-agregar',
@@ -37,6 +38,7 @@ export class EncuestaAgregarComponent implements OnInit {
     private encuestasService: EncuestasService,
     private router: Router,
     private AuthService: AuthService,
+    private alertService: AlertService
   ) { }
 
   toggleSettingsSidebar(): void {
@@ -156,7 +158,7 @@ export class EncuestaAgregarComponent implements OnInit {
 
   onSubmit() {
     if (this.surveyForm.invalid) {
-      alert('El formulario no es válido. Por favor, revisa que el título y todas las preguntas tengan texto.');
+      this.alertService.show('El formulario no es válido. Por favor, revisa que el título y todas las preguntas tengan texto.');
       this.surveyForm.markAllAsTouched(); 
       return;
     }
@@ -179,12 +181,12 @@ export class EncuestaAgregarComponent implements OnInit {
 
     this.encuestasService.createSurvey(payload).subscribe({
       next: (response) => {
-        alert('¡Encuesta guardada con éxito!');
+        this.alertService.show('¡Encuesta guardada con éxito!');
         this.router.navigate(['/dashboard']); 
       },
       error: (err) => {
         console.error('Error al guardar la encuesta:', err);
-        alert('Ocurrió un error al guardar la encuesta. Revisa la consola para más detalles.');
+        this.alertService.show('Ocurrió un error al guardar la encuesta. Revisa la consola para más detalles.');
       }
     });
   }

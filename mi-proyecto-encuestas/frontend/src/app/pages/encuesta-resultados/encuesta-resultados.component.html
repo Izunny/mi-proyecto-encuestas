@@ -19,10 +19,29 @@
       <hr>
     </div>
     @if (opcion[0][1] === 1 || opcion[0][1] === 2) {
-      @for (respuesta of opcion[1]; track $index) {
-        <p class="response-text">{{respuesta}}</p>
+  @for (respuesta of opcion[1]; track $index) {
+
+    <div class="response-box">
+
+      <p class="response-text">
+        {{
+          respuesta.length > 250 && !respuesta.showFull
+            ? (respuesta | slice:0:250) + '...'
+            : respuesta
+        }}
+      </p>
+
+      @if (respuesta.length > 250) {
+        <button class="toggle-btn" (click)="respuesta.showFull = !respuesta.showFull">
+          {{ respuesta.showFull ? 'Ver menos ▲' : 'Ver más ▼' }}
+        </button>
       }
-    } @else if (opcion[0][1] === 3) {
+      
+    </div>
+
+  }
+}
+ @else if (opcion[0][1] === 3) {
       {{createBarChart(opcion[1], opcion[2])}}
       <div class="chart-container">
         <canvas

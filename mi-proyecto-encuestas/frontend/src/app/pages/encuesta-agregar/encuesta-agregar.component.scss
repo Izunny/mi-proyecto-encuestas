@@ -81,9 +81,16 @@
   
 }
 
+.boton-derecha {
+  display: flex;
+  justify-content: flex-end;
+  margin-right: 18%;
+}
+
 .btn-secondary:hover {
   background-color: var(--border-color);
 }
+
 .btn-primary {
   background-color: var(--primary-color);
   border-color: var(--primary-color);
@@ -109,7 +116,7 @@
 .form-actions {
   display: flex;
   justify-content: space-between; 
-  align-items: center;
+  
   padding-top: 20px;
 }
 

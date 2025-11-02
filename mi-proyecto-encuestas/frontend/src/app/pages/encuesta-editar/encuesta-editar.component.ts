@@ -4,6 +4,7 @@ import { ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators } fr
 import { ActivatedRoute, Router } from '@angular/router';
 import { EncuestasService } from '../../services/encuestas.service';
 import { CdkDragDrop, moveItemInArray, DragDropModule } from '@angular/cdk/drag-drop';
+import { AlertService } from '../../services/alert.service';
 
 @Component({
   selector: 'app-encuesta-editar',
@@ -35,7 +36,8 @@ export class EncuestaEditarComponent implements OnInit {
     private fb: FormBuilder,
     private encuestasService: EncuestasService,
     private route: ActivatedRoute,
-    private router: Router
+    private router: Router,
+    private alertService: AlertService
   ) { }
 
   toggleSettingsSidebar(): void {
@@ -189,7 +191,7 @@ export class EncuestaEditarComponent implements OnInit {
 
   onSubmit() {
     if (this.surveyForm.invalid) {
-      alert('Formulario inválido.');
+      this.alertService.show('Formulario inválido.');
       return;
     }
 
@@ -211,12 +213,12 @@ export class EncuestaEditarComponent implements OnInit {
 
     this.encuestasService.updateSurvey(this.surveyId, payload).subscribe({
       next: () => {
-        alert('¡Encuesta actualizada con éxito!');
+        this.alertService.show('¡Encuesta actualizada con éxito!');
         this.router.navigate(['/dashboard']);
       },
       error: (err) => {
         console.error('Error al actualizar:', err);
-        alert('Ocurrió un error al actualizar.');
+        this.alertService.show('Ocurrió un error al actualizar.');
       }
     });
   }

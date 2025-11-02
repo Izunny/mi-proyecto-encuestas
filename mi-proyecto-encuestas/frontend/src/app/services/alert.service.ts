@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Subject } from 'rxjs';
 
-// Definimos una "interfaz" para el plano de nuestra alerta
+//  plano de nuestra alerta
 export interface AlertConfig {
   message: string;
   type: 'success' | 'error' | 'confirm'; // Podemos tener diferentes tipos
@@ -12,10 +12,10 @@ export interface AlertConfig {
   providedIn: 'root'
 })
 export class AlertService {
-  // Un Subject es un "difusor" de observables. Es como un locutor de radio.
+ 
   private alertSubject = new Subject<AlertConfig | null>();
   
-  // Los componentes se "sintonizan" a esta radio para escuchar los mensajes
+  
   public alertState$ = this.alertSubject.asObservable();
 
   constructor() { }

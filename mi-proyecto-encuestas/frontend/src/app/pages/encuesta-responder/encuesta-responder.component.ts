@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, FormControl, FormArray } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { EncuestasService } from '../../services/encuestas.service';
+import { AlertService } from '../../services/alert.service';
 // Quitamos AuthService porque esta página es pública
 // import { AuthService } from '../../services/auth.service'; 
 
@@ -23,7 +24,8 @@ export class EncuestaResponderComponent implements OnInit {
     private fb: FormBuilder,
     private encuestasService: EncuestasService,
     private route: ActivatedRoute,
-    private router: Router
+    private router: Router,
+    private alertService: AlertService
     // Quitamos AuthService del constructor
   ) {}
 
@@ -98,7 +100,7 @@ export class EncuestaResponderComponent implements OnInit {
 
   onSubmit(): void {
     if (this.responseForm.invalid) {
-      alert('Por favor, responde todas las preguntas requeridas.');
+     this.alertService.show('Por favor, responde todas las preguntas requeridas.');
       return;
     }
 
@@ -128,12 +130,12 @@ export class EncuestaResponderComponent implements OnInit {
 
     this.encuestasService.submitResponses(submissionData).subscribe({
       next: () => {
-        alert('¡Gracias por completar la encuesta!');
+        this.alertService.show('¡Gracias por completar la encuesta!');
         this.router.navigate(['/']); // Redirigimos a la página de inicio
       },
       error: (err: any) => {
         console.error('Error al enviar las respuestas:', err);
-        alert(`Ocurrió un error: ${err.error.error || 'Inténtalo de nuevo.'}`);
+        this.alertService.show(`Ocurrió un error: ${err.error.error || 'Inténtalo de nuevo.'}`);
       }
     });
   }

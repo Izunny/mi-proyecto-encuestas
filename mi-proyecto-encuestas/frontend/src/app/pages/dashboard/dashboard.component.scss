@@ -285,3 +285,32 @@
     background-color: #0056b3;
   }
 }
+
+
+.modal-body .form-group {
+  margin-bottom: 1.5rem; /* Espacio entre campos del formulario */
+}
+
+.modal-body .form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.modal-body .form-group input[type="number"] {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1rem;
+  box-sizing: border-box; /* Asegura que el padding no rompa el ancho */
+}
+
+.modal-body .form-group .form-help {
+  display: block;
+  margin-top: 0.5rem;
+  font-size: 0.85rem;
+  color: #6c757d;
+}
+

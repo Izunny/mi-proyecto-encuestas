@@ -310,6 +310,12 @@
   }
 }
 
+.boton-derecha {
+  display: flex;
+  justify-content: flex-end;
+  margin-right: 18%;
+}
+
 //* --- Estilos para el Sidebar de Ajustes --- */
 
 .settings-sidebar {

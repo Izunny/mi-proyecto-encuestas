@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit,ViewChild, OnDestroy, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
@@ -26,9 +26,17 @@ export class DashboardComponent implements OnInit, OnDestroy {
   isLoading = true;
   private userSubscription!: Subscription;
   
-  public isShareOptionsModalOpen = false;
-  public isShareModalOpen = false;
+  public isShareOptionsModalOpen = false; // Para el modal de opciones
+  public isShareLinkModalOpen = false;    // Para el modal del QR
   public shareUrl = '';
+
+  public shareOptions = {
+    maxUses: null as number | null,
+    durationDays: 7
+  };
+
+  // Necesitamos el ViewChild para la función de descarga
+  @ViewChild('myQRCode') qrCodeElement!: QRCodeComponent;
 
   constructor(
     private encuestasService: EncuestasService, 
@@ -47,50 +55,61 @@ export class DashboardComponent implements OnInit, OnDestroy {
     if (this.userSubscription) { this.userSubscription.unsubscribe(); }
   }
 
-  shareSurvey(): void {
+ shareSurvey(): void {
+    if (!this.selectedSurveyId) {
+      this.alertService.show('Por favor, selecciona una encuesta para compartir.', 'error');
+      return;
+    }
+    
+    // Reseteamos las opciones a sus valores por defecto
+    this.shareOptions = {
+      maxUses: null, // Lo ponemos en null para que el placeholder aparezca
+      durationDays: 7
+    };
+    // Abrimos el modal de opciones
+    this.isShareOptionsModalOpen = true;
+  }
+  
+ 
+  onGenerateShareLink(): void {
     if (!this.selectedSurveyId) return;
 
-    const usesInput = prompt("¿Cuántas veces se puede usar este enlace?\n(Deja en blanco o '0' para ilimitado)", "0");
-    if (usesInput === null) return;
+    
+    const uses = this.shareOptions.maxUses;
+    const maxUses = (uses && uses > 0) ? uses : null;
+    
+    const days = this.shareOptions.durationDays;
+    const durationDays = (days && days > 0) ? days : 7;
 
-    const durationInput = prompt("¿Por cuántos días será válido este enlace?\n(Deja en blanco para 7 días)", "7");
-    if (durationInput === null) return;
-
-    const uses = parseInt(usesInput, 10);
-    const maxUses = (!isNaN(uses) && uses > 0) ? uses : null;
-    const days = parseInt(durationInput, 10);
-    const durationDays = (!isNaN(days) && days > 0) ? days : 7;
-
+   
     this.encuestasService.generateShareToken(this.selectedSurveyId, maxUses, durationDays).subscribe({
-      next: (response: any) => { // Añadimos ': any'
+      next: (response: any) => {
         const token = response.token;
         this.shareUrl = `${window.location.origin}/responder/${token}`;
-        this.isShareModalOpen = true;
+        
+        
+        this.isShareOptionsModalOpen = false;
+        this.isShareLinkModalOpen = true; 
       },
-      error: (err: any) => { /* ... */ }
+      error: (err: any) => {
+        console.error('Error al generar el enlace:', err);
+        //  servicio de alertas
+        this.alertService.show('No se pudo generar el enlace para compartir.', 'error');
+      }
     });
   }
 
   copyUrlToClipboard(): void {
     navigator.clipboard.writeText(this.shareUrl).then(() => {
-      alert('¡Enlace copiado al portapapeles!');
-    }).catch(err => {
-      console.error('Error al copiar el enlace:', err);
+      this.alertService.show('¡Enlace copiado al portapapeles!', 'success');
     });
   }
 
-  downloadQRCode(qrCodeInstance: QRCodeComponent): void {
+  downloadQRCode(): void {
     try {
-      // --- ✨ ESTA ES LA CORRECCIÓN CLAVE ✨ ---
-      // La propiedad correcta no es 'el', es 'qrcElement'
-      const canvas = qrCodeInstance.qrcElement.nativeElement.querySelector('canvas');
+      const canvas = this.qrCodeElement.qrcElement.nativeElement.querySelector('canvas');
+      if (!canvas) throw new Error("No se pudo encontrar el canvas del QR.");
       
-      if (!canvas) {
-        console.error("No se pudo encontrar el canvas del QR.");
-        return;
-      }
-
-      // El resto de la función (crear el enlace, etc.) estaba perfecta
       const dataUrl = canvas.toDataURL('image/png');
       const link = document.createElement('a');
       link.href = dataUrl;
@@ -98,24 +117,23 @@ export class DashboardComponent implements OnInit, OnDestroy {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-
     } catch (err) {
       console.error('Error al descargar el QR:', err);
-      alert('No se pudo descargar el código QR.');
+      this.alertService.show('No se pudo descargar el código QR.', 'error');
     }
   }
   
   loadUserSurveys(): void {
-    this.isLoading = true; // 2. Ponlo en 'true' ANTES de iniciar la carga
+    this.isLoading = true; 
     this.encuestasService.getSurveysByUser().subscribe({
       next: (data: any[]) => {
         this.surveys = data;
         this.filterSurveys(); 
-        this.isLoading = false; // 3. ¡PONLO EN 'false' AQUÍ AL TERMINAR!
+        this.isLoading = false; 
       },
       error: (err) => {
         console.error('Error al cargar las encuestas del usuario:', err);
-        this.isLoading = false; // 4. Y TAMBIÉN AQUÍ, EN CASO DE ERROR
+        this.isLoading = false;
       }
     });
   }
@@ -167,42 +185,39 @@ filterSurveys(): void {
     this.selectedSurveyId = id;
   }
 
-  // ... (dentro de tu clase DashboardComponent)
 
   deleteSelectedSurvey(): void {
     if (!this.selectedSurveyId) {
-      // Usamos el nuevo servicio de alertas
+      // servicio de alertas
       this.alertService.show('Por favor, selecciona una encuesta para eliminar.', 'error');
       return;
     }
     
-    // Buscamos la encuesta para ver si tiene respuestas
+    
     const surveyToDelete = this.surveys.find(s => s.idencuesta === this.selectedSurveyId);
     if (!surveyToDelete) return; 
 
-    // Preparamos el mensaje de confirmación
+    
     let confirmationMessage = '¿Estás seguro de que quieres eliminar esta encuesta?';
     if (surveyToDelete.responseCount > 0) {
       confirmationMessage = `¡ATENCIÓN! Esta encuesta ya tiene ${surveyToDelete.responseCount} respuesta(s). Se borrarán todos los resultados.\n\n¿Deseas continuar?`;
     }
 
-    // 1. Usamos el nuevo 'confirm' del servicio
+    
     this.alertService.confirm(confirmationMessage, () => {
       
-      // 2. Esta función de flecha SÓLO se ejecuta si el usuario presiona "Aceptar"
+     
       this.encuestasService.deleteSurvey(this.selectedSurveyId!).subscribe({
         next: () => {
           this.alertService.show('Encuesta eliminada con éxito.', 'success');
           
-          // --- 👇 ¡AQUÍ ESTÁ LA MAGIA! 👇 ---
-          // 3. Una vez eliminada, volvemos a cargar la lista que esté activa.
-          //    La nueva lista vendrá sin la encuesta que acabamos de borrar.
+         
+           
           if (this.viewMode === 'user') {
             this.loadUserSurveys();
           } else {
             this.loadAllSurveys();
           }
-          // --- 👆 FIN DE LA MAGIA 👆 ---
 
           this.selectedSurveyId = null; // Limpiamos la selección
         },

@@ -10,12 +10,15 @@
        
     
     <div class="editor-body"> 
+        <div class="boton-derecha">
+          <button type="button" (click)="toggleSettingsSidebar()" class="btn btn-secondary1">
+            <i class="fas fa-cog"></i> Ajustes
+          </button>
+        </div>
+
+
       <form [formGroup]="surveyForm" (ngSubmit)="onSubmit()" class="survey-editor">
         <input type="text" class="survey-title-input" placeholder="Escribe el título de tu encuesta..." formControlName="nombre">
-
-        <button type="button" (click)="toggleSettingsSidebar()" class="btn btn-secondary">
-          <i class="fas fa-cog"></i> Ajustes
-        </button>
 
         <div class="question-list" 
      formArrayName="preguntas"
@@ -106,9 +109,13 @@
           </div>
 
           <div>
-          <button type="submit" class="btn btn-success save-survey-btn">
+         <button 
+            *ngIf="preguntas().length > 0" 
+            type="submit" 
+            class="btn btn-success save-survey-btn">
             <i class="fas fa-save"></i> Guardar Encuesta
           </button>
+
           </div>
 
         </div>
