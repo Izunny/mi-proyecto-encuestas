@@ -1,4 +1,3 @@
-/* src/app/landing/landing.component.scss */
 
 :host {
 
@@ -10,18 +9,17 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  min-height: 100vh;
-  padding: 0px 0px 25px 0px;
-  box-sizing: border-box; 
+  margin-top: -25px;
+
 }
 
 h1 {
-  font-size: 4rem;
-  margin-bottom: 2rem;
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
   .highlight-blue {
     
     border-bottom: 3px solid var(--highlight-color);
-    padding-bottom: 4px;
+    
 }
 }
 
@@ -29,32 +27,32 @@ h1 {
 /* --- Sección Hero --- */
 .hero-section {
   text-align: center;
-  padding: 0px 0px 0px 0px;
   flex-grow: 1; 
   display: flex;
   flex-direction: column;
   justify-content: center;
   
+  
   h1 {
-    font-size: 4.5rem;
-    margin-bottom: 2rem;
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
     .highlight-blue {
       
       border-bottom: 3px solid var(--highlight-color);
-      padding-bottom: 4px;
+      
     }
   }
   
   .subtitle {
-    font-size: 30px;
+    font-size: 1.5rem;
     color: #8b949e;
     max-width: 1000px;
     margin: 0 auto 30px auto;
   }
   
   .cta-buttons {
-    margin-top: 20px;
-    margin-bottom: 50px;
+    margin-top: 10px;
+    margin-bottom: 25px;
     a {
       margin: 0 10px;
     }
@@ -62,13 +60,37 @@ h1 {
   
   .hero-image-container img {
     max-width: 100%;
-    width: 1000px;
+    width: 400px;
     border-radius: 8px;
     border: 2px solid var(--border-color);
   }
 
 }
 
-
+.features-section {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin-top: 0px;
+  margin-bottom: 40px;
+  
+  .feature-card {
+    background-color: var(--card-background);
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    padding: 20px;
+    width: 250px;
+    text-align: center;
+    
+    h3 {
+      margin-bottom: 10px;
+    }
+    
+    p {
+      color: #6a737d;
+    }
+  }
+}
 
 

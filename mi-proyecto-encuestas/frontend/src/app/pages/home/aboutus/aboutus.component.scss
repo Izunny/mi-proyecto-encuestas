@@ -8,16 +8,18 @@
 
 
 .parrafo {
-    height: 400px;
+    height: 300px;
     width: 600px;
-    font-size: 30px;
+    font-size: 28px;
     text-align: start;
+    line-height: 1.5;
 }
 
 .imagen-aboutus {
-    width: 650px;
+    width: 500px;
     border-radius: 10px;
     border: 4px solid var(--border-color);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .second-section {
