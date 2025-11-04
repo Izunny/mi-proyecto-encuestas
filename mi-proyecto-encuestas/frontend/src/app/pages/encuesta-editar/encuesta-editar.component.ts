@@ -191,7 +191,8 @@ export class EncuestaEditarComponent implements OnInit {
 
   onSubmit() {
     if (this.surveyForm.invalid) {
-      this.alertService.show('Formulario inválido.');
+       this.alertService.show('El formulario no es válido. Revisa que el título y todas las preguntas tengan texto.', 'error');
+      this.surveyForm.markAllAsTouched(); 
       return;
     }
 
@@ -213,12 +214,12 @@ export class EncuestaEditarComponent implements OnInit {
 
     this.encuestasService.updateSurvey(this.surveyId, payload).subscribe({
       next: () => {
-        this.alertService.show('¡Encuesta actualizada con éxito!');
-        this.router.navigate(['/dashboard']);
+        this.alertService.show('¡Encuesta guardada con éxito!', 'success');
+        this.router.navigate(['/dashboard']); 
       },
       error: (err) => {
-        console.error('Error al actualizar:', err);
-        this.alertService.show('Ocurrió un error al actualizar.');
+          console.error('Error al guardar la encuesta:', err);
+        this.alertService.show('Ocurrió un error al guardar la encuesta.', 'error');
       }
     });
   }

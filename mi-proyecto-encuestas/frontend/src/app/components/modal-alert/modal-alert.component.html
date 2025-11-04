@@ -1,8 +1,3 @@
-<!-- 
-  Usamos el pipe 'async'. Esto suscribe automáticamente al observable alert$.
-  Si alert$ emite 'null', todo este div desaparece.
-  Si emite un objeto AlertConfig, 'alert' toma ese valor y el div aparece.
--->
 <div *ngIf="alert$ | async as alert" class="modal-overlay" (click)="close()">
   <!-- (click)="$event.stopPropagation()" evita que el modal se cierre al hacer clic dentro -->
   <div class="modal-content" (click)="$event.stopPropagation()" [ngClass]="'alert-' + alert.type">

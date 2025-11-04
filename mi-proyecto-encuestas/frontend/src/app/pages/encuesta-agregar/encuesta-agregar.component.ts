@@ -158,7 +158,7 @@ export class EncuestaAgregarComponent implements OnInit {
 
   onSubmit() {
     if (this.surveyForm.invalid) {
-      this.alertService.show('El formulario no es válido. Por favor, revisa que el título y todas las preguntas tengan texto.');
+      this.alertService.show('El formulario no es válido. Revisa que el título y todas las preguntas tengan texto.', 'error');
       this.surveyForm.markAllAsTouched(); 
       return;
     }
@@ -168,7 +168,7 @@ export class EncuestaAgregarComponent implements OnInit {
     const reorderedPreguntas = this.preguntas().controls.map((control, index) => {
       return {
         ...control.value, 
-        orden: index + 1   
+        orden: index // Usamos el índice basado en 0
       };
     });
 
@@ -180,13 +180,13 @@ export class EncuestaAgregarComponent implements OnInit {
     console.log('Enviando payload al backend:', payload); 
 
     this.encuestasService.createSurvey(payload).subscribe({
-      next: (response) => {
-        this.alertService.show('¡Encuesta guardada con éxito!');
+      next: (response: any) => {
+        this.alertService.show('¡Encuesta guardada con éxito!', 'success');
         this.router.navigate(['/dashboard']); 
       },
-      error: (err) => {
+      error: (err: any) => {
         console.error('Error al guardar la encuesta:', err);
-        this.alertService.show('Ocurrió un error al guardar la encuesta. Revisa la consola para más detalles.');
+        this.alertService.show('Ocurrió un error al guardar la encuesta.', 'error');
       }
     });
   }
