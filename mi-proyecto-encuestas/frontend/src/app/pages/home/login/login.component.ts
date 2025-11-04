@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router'; 
 import { AuthService } from '../../../services/auth.service'; 
+import { AlertService } from '../../../services/alert.service';
 
 @Component({
   selector: 'app-login',
@@ -22,6 +23,7 @@ export class LoginComponent implements OnInit {
     private authService: AuthService, 
     private router: Router, 
     private fb: FormBuilder,
+    private alertService: AlertService
   ) {}
 
   ngOnInit(): void {

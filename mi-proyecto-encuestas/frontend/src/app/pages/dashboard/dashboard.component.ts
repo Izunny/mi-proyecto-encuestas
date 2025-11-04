@@ -35,7 +35,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     durationDays: 7
   };
 
-  // Necesitamos el ViewChild para la función de descarga
+  //  la función de descarga
   @ViewChild('myQRCode') qrCodeElement!: QRCodeComponent;
 
   constructor(

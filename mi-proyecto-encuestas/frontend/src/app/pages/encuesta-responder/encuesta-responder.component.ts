@@ -63,7 +63,6 @@ export class EncuestaResponderComponent implements OnInit {
     });
   }
 
-  // (Las funciones buildFormControls, onCheckboxChange, y setRating se quedan igual)
   buildFormControls(): void {
     const respuestasGroup = this.responseForm.get('respuestas') as FormGroup;
     this.survey.preguntas.forEach((pregunta: any) => {
@@ -104,7 +103,6 @@ export class EncuestaResponderComponent implements OnInit {
       return;
     }
 
-    // (Tu lógica de 'processedRespuestas' está perfecta y se queda igual)
     const rawRespuestas = this.responseForm.value.respuestas;
     const processedRespuestas: { [key: string]: any } = {};
     for (const preguntaId of Object.keys(rawRespuestas)) {

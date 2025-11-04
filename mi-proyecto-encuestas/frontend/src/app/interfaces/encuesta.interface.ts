@@ -2,7 +2,7 @@ export interface Encuesta {
   idencuesta: number;
   nombre: string;
   descripcion: string;
-  username: string; // <-- ESTA ES LA CORRECCIÓN CLAVE
+  username: string; 
   fecha: string;
   activo: 'S' | 'N';
   responseCount: number;

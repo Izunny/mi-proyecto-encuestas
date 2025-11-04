@@ -7,7 +7,6 @@ import { Observable, BehaviorSubject, tap } from 'rxjs';
   providedIn: 'root'
 })
 export class AuthService {
-  // CORRECCIÓN: URL base para las rutas de autenticación
   private authApiUrl = 'http://localhost:3000/api/auth';
 
   private userSubject = new BehaviorSubject<any | null>(null);
@@ -25,7 +24,6 @@ export class AuthService {
   }
 
   login(credentials: { username: string, password: string }): Observable<any> {
-    // CORRECCIÓN: Ahora llama a la ruta correcta .../api/auth/login
     return this.http.post<any>(`${this.authApiUrl}/login`, credentials).pipe(
       tap(response => {
         if (response.token && response.user) {
@@ -38,7 +36,6 @@ export class AuthService {
   }
 
   logout(): void {
-    // CORRECCIÓN: Llama a la ruta correcta .../api/auth/logout
     this.http.post(`${this.authApiUrl}/logout`, {}).subscribe();
     
     localStorage.removeItem('token');

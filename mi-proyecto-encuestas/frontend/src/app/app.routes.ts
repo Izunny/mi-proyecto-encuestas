@@ -23,9 +23,6 @@ export const routes: Routes = [
     { path: 'aboutus', component: AboutusComponent, canActivate: [AuthenticatedGuard]},
     { path: 'como', component: ComoComponent, canActivate: [AuthenticatedGuard] },
 
-    // --- 👇👇 ESTA ES LA RUTA CORREGIDA 👇👇 ---
-    // 1. La ruta ahora es 'responder/:token'
-    // 2. Le hemos quitado el 'AuthGuard' para que sea pública.
     { path: 'responder/:token', component: EncuestaResponderComponent },
 
     // --- Rutas Privadas (requieren inicio de sesión) ---

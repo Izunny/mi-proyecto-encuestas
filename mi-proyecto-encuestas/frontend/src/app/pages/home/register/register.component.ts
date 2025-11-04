@@ -4,6 +4,8 @@ import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angula
 import { Router } from '@angular/router'; 
 // Ya no necesitas RegisterService, así que puedes borrar esa línea
 import { AuthService } from '../../../services/auth.service'; 
+import { AlertService } from '../../../services/alert.service';
+
 
 @Component({
   selector: 'app-register',
@@ -22,7 +24,9 @@ export class RegisterComponent implements OnInit {
     private fb: FormBuilder,
     private router: Router,
     // CORRECCIÓN: Inyecta AuthService aquí
-    private authService: AuthService 
+    private authService: AuthService,
+    private alertService: AlertService
+    
   ) { }
 
   ngOnInit(): void {
@@ -41,7 +45,7 @@ export class RegisterComponent implements OnInit {
     // Ahora 'this.authService' existe y la llamada funcionará
     this.authService.register(this.registerForm.value).subscribe({
       next: () => {
-        alert('¡Usuario registrado con éxito! Ahora puedes iniciar sesión.');
+        this.alertService.show('¡Usuario registrado con éxito! Ahora puedes iniciar sesión.');
         this.router.navigate(['/login']);
       },
       error: (err) => {
