@@ -769,33 +769,62 @@ app.get('/api/pdf/:id', async (req, res) => {
       }
     }
 
+
   const doc = new PDFDocument();
   contador = 0;
   res.setHeader('Content-Type', 'application/pdf');
   res.setHeader('Content-Disposition', 'inline; filename=archivo.pdf');
 
   doc.pipe(res);
+  
+  // Logo y texto 
+  doc.image('logo.png', 50, 50, {width: 25});
+  doc.font("Helvetica-Bold").text("Encuestas Dinamicas", 80, 60);
+  doc.font("Helvetica-Bold").text("Resultados", 475, 60);
 
-  doc.font("Helvetica-Bold").fontSize(22).text('Resultados de la encuesta: \n' + encuesta.nombre, { align: 'center' });
+  // Linea o separador en la pagina superior
+  doc.lineWidth(1.5);
+  doc.strokeColor('#10132D');
+  doc.moveTo(50,85);
+  doc.lineTo(550,85);
+  doc.stroke();
+   
+  doc.moveDown(10)  
+  doc.font("Helvetica-Bold").fontSize(22).text(encuesta.nombre, 50, 120);
   doc.moveDown();
-  doc.font("Helvetica").fontSize(14).text(encuesta.descripcion, { align: 'center' });
+  doc.font("Helvetica").fontSize(14).text("Descripcion: " + encuesta.descripcion);
   doc.moveDown();
-  doc.text(`Fecha: ${new Date().toLocaleString()}`, { align: 'center' });
+  doc.text(`Fecha: ${new Date().toLocaleString()}`);
   doc.addPage();
   
   //console.log(resultadosFinales)
   for (opcion of resultadosFinales) {
+  contador += 1;
+
+  // Logo y texto 
+  doc.image('logo.png', 50, 50, {width: 25});
+  doc.font("Helvetica-Bold").fontSize(12).text("Encuestas Dinamicas", 80, 60);
+  doc.font("Helvetica-Bold").text("Resultados", 475, 60);
+
+  // Linea o separador en la pagina superior
+  doc.lineWidth(1.5);
+  doc.strokeColor('#10132D');
+  doc.moveTo(50,85);
+  doc.lineTo(550,85);
+  doc.stroke();
+
+  doc.font('Helvetica').fontSize(12).text(contador, 550, 700);
+
+
     doc.moveDown();
-    doc.font('Helvetica-Bold').text("- " + opcion[0][0]);
+    doc.font('Helvetica-Bold').text(contador + ".- " + opcion[0][0], 50, 110);
     doc.font('Helvetica');
       doc.moveDown();
     if (opcion[0][1] === 1 || opcion[0][1] === 2){
       for (respuesta of opcion[1]) {
-        contador += 1;
-        doc.text(contador + ". " + respuesta);
+        doc.text("- " + respuesta);
         doc.moveDown()
       };
-      contador = 0;
     } else if (opcion[0][1] === 3 || opcion[0][1] === 5) {
       const canvas = createCanvas(800, 600); 
       const ctx = canvas.getContext('2d');
@@ -892,7 +921,7 @@ app.get('/api/pdf/:id', async (req, res) => {
 
       const chartImageBuffer = canvas.toBuffer('image/png');
           doc.image(chartImageBuffer, {
-            fit: [doc.page.width - 150, 400],
+            fit: [doc.page.width - 300, 300],
             align: 'center',
             valign: 'center'
           });
@@ -1073,9 +1102,19 @@ app.get('/api/XLSX/:id', async (req, res) => {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('Resultados');
 
+    
+
+
+
+
     // Informacion de la encuesta
     worksheet.addRow([encuesta.nombre]);
     worksheet.getCell('A1').font = { bold: true };
+    worksheet.getCell('A1').fill = {
+    type: 'pattern',
+    pattern: 'solid',
+    fgColor: { argb: '5898CC' } 
+    };
     worksheet.addRow([encuesta.descripcion]);
     worksheet.getCell('B2').value = encuesta.fecha;
     worksheet.addRow(['']);
@@ -1087,8 +1126,10 @@ app.get('/api/XLSX/:id', async (req, res) => {
         // Nombre de la pregunta
         bold = worksheet.addRow([preguntas[0][0]]);
         bold.eachCell((cell) => {
-          cell.font = { bold: true};
+          cell.font = { bold: true},
+          cell.fill = { type: 'pattern', pattern: 'solid', fgColor: {argb: '58CC65'}};
         });
+
         arrayOpciones = [];
         // Preguntas
         for (opcion of preguntas[1]){
@@ -1104,6 +1145,7 @@ app.get('/api/XLSX/:id', async (req, res) => {
         bold = worksheet.addRow([preguntas[0][0]]);
         bold.eachCell((cell) => {
           cell.font = { bold: true};
+          cell.fill = { type: 'pattern', pattern: 'solid', fgColor: {argb: '58CC65'}};
         });
         arrayOpciones = [];
 
@@ -1128,6 +1170,7 @@ app.get('/api/XLSX/:id', async (req, res) => {
         bold = worksheet.addRow([preguntas[0][0]]);
         bold.eachCell((cell) => {
           cell.font = { bold: true};
+          cell.fill = { type: 'pattern', pattern: 'solid', fgColor: {argb: '58CC65'}};
         });
         arrayOpciones = [];
 
@@ -1147,6 +1190,7 @@ app.get('/api/XLSX/:id', async (req, res) => {
         bold = worksheet.addRow([preguntas[0][0]]);
         bold.eachCell((cell) => {
           cell.font = { bold: true};
+          cell.fill = { type: 'pattern', pattern: 'solid', fgColor: {argb: '58CC65'}};
         });
         arrayOpciones = [];
 
@@ -1155,8 +1199,13 @@ app.get('/api/XLSX/:id', async (req, res) => {
 
       // Respuestas
       arrayRespuestas = [];
+      contador = 0;
       for (respuesta of preguntas[2]) {
         arrayRespuestas.push(respuesta);
+        contador += 1;
+        if (contador == 5) {
+          break;
+        }
       };
       worksheet.addRow(arrayRespuestas);
       worksheet.addRow(['']);
@@ -1166,7 +1215,6 @@ app.get('/api/XLSX/:id', async (req, res) => {
 
   // Write file to response
   await workbook.xlsx.write(res);
-  console.log(resultadosFinales);
   res.end();
   
   console.log('Excel file created successfully!');
