@@ -7,7 +7,8 @@
   min-height:fit-content;
   padding: 0px 170px 0px 170px;
   box-sizing: border-box; 
-  margin-left: 10%;
+  
+  align-items: center;
 }
 
 label {
@@ -44,7 +45,7 @@ label {
 
 #image-register {
   display: block;                   
-  margin: 60px auto;                
+  margin: 90px auto;                
   width: 100%;                     
   max-width: 400px;                
   height: auto;                     
