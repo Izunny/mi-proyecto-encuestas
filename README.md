@@ -1,59 +1,86 @@
-# Frontend
+# mi-proyecto-encuestas
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 20.2.1.
+Documento de referencia para el proyecto de encuestas con frontend en Angular y backend en Node.js.
 
-## Development server
+## Resumen
 
-To start a local development server, run:
+Aplicación para crear, gestionar y responder encuestas. El frontend está desarrollado con Angular y el backend con Node.js (Express). La base de datos se crea desde el script `db_encuestas.sql` ubicado en la carpeta `backend`.
 
-```bash
-ng serve
-```
+## Estructura del proyecto
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+- **backend/**: servidor Node.js, configuración y script SQL.
+- **frontend/**: aplicación Angular (SPA).
 
-## Code scaffolding
+Estructura principal:
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+- [backend](mi-proyecto-encuestas/backend)
+- [frontend](mi-proyecto-encuestas/frontend)
 
-```bash
-ng generate component component-name
-```
+## Tecnologías
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+- Frontend: Angular
+- Backend: Node.js, Express
+- Base de datos: script SQL (`backend/db_encuestas.sql`) — MySQL/Postgres/SQLite según su despliegue
 
-```bash
-ng generate --help
-```
+## Requisitos
 
-## Building
+- Node.js 18+ (o LTS compatible)
+- npm o yarn
+- Sistema de base de datos compatible con el script SQL (p. ej. MySQL)
 
-To build the project run:
+## Instalación y ejecución
 
-```bash
-ng build
-```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
+1. Clonar el repositorio.
+2. Backend:
 
 ```bash
-ng test
+cd mi-proyecto-encuestas/backend
+npm install
+# configurar variables de entorno o editar config.js según su entorno
+node index.js
 ```
 
-## Running end-to-end tests
+3. Base de datos:
 
-For end-to-end (e2e) testing, run:
+- Importar `backend/db_encuestas.sql` en su servidor de base de datos para crear las tablas iniciales y datos de ejemplo.
+
+4. Frontend:
 
 ```bash
-ng e2e
+cd mi-proyecto-encuestas/frontend
+npm install
+ng serve --open
 ```
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+## Configuración
 
-## Additional Resources
+- Revisar `backend/config.js` para ajustar credenciales y la conexión a la base de datos.
+- Si el backend usa JWT u otro método de autenticación, configurar las claves/secretos en variables de entorno.
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+## Endpoints y flujo (rápido)
+
+- El backend expone rutas API bajo `/api` (ver `backend/index.js` y las rutas dentro de la carpeta `backend` para detalles). Las operaciones típicas son:
+  - Gestión de encuestas: crear, editar, eliminar, listar
+  - Responder encuestas: enviar respuestas y almacenar resultados
+  - Autenticación: registro, login, verificación de token
+
+## Desarrollo y pruebas
+
+- Frontend: `ng test` para pruebas unitarias.
+- Backend: ejecutar los tests (si existen) con `npm test` desde `backend`.
+
+## Despliegue
+
+- Construir el frontend con `ng build --prod` y servir los archivos estáticos desde el backend o desde un CDN/servidor estático.
+- Asegurar la configuración de variables de entorno y la conexión a la base de datos en el entorno de producción.
+
+## Contribuir
+
+- Abrir issues para bugs o mejoras.
+- Crear pull requests con descripción clara y pasos para reproducir cambios.
+
+## Referencias
+
+- Script de la base de datos: [backend/db_encuestas.sql](mi-proyecto-encuestas/backend/db_encuestas.sql)
+- Archivo principal del backend: [backend/index.js](mi-proyecto-encuestas/backend/index.js)
+
