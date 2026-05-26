@@ -57,3 +57,50 @@ Angular CLI does not come with an end-to-end testing framework by default. You c
 ## Additional Resources
 
 For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+
+
+# mi-proyecto-encuestas
+
+Repositorio organizado como monorrepo limpio, con separación física entre backend y frontend para facilitar el despliegue independiente, la integración autónoma y el mantenimiento de cada capa.
+
+## Estructura del proyecto
+
+```text
+mi-proyecto-encuestas/
+├── backend/                     # Entorno de ejecución de la API REST (Node.js)
+│   ├── config.js                # Configuración de conexión y variables del backend
+│   ├── db_encuestas.sql         # Script SQL para crear la base de datos
+│   ├── index.js                 # Punto de entrada del backend
+│   ├── package.json             # Dependencias y scripts del servidor
+│   ├── package-lock.json
+│   ├── logo.png
+│   └── example.pdf
+├── frontend/                    # Entorno de la interfaz de usuario (Angular SPA)
+│   ├── angular.json             # Configuración del proyecto Angular
+│   ├── package.json             # Dependencias y scripts del cliente
+│   ├── src/
+│   │   ├── main.ts              # Punto de entrada de Angular
+│   │   ├── index.html
+│   │   ├── styles.scss
+│   │   └── app/
+│   │       ├── app.component.ts
+│   │       ├── app.component.html
+│   │       ├── app.component.scss
+│   │       ├── app.routes.ts    # Rutas de la aplicación
+│   │       ├── components/      # Componentes reutilizables de UI
+│   │       ├── pages/           # Vistas principales del sistema
+│   │       ├── services/        # Servicios para consumo de API y lógica de datos
+│   │       ├── guard/           # Protección de rutas
+│   │       ├── interceptors/    # Interceptor HTTP para autenticación
+│   │       └── interfaces/      # Tipos e interfaces del modelo
+│   ├── public/                  # Recursos estáticos
+│   └── README.md
+├── ARCHITECTURE.md              # Descripción general de la arquitectura
+└── README.md                    # Documentación principal del proyecto
+```
+
+## Referencias
+
+- [Arquitectura](mi-proyecto-encuestas/ARCHITECTURE.md)
+- [Backend](mi-proyecto-encuestas/backend)
+- [Frontend](mi-proyecto-encuestas/frontend)
